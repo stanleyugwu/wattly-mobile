@@ -1,23 +1,22 @@
+import { EdgeInsets } from "react-native-safe-area-context";
 import { createTheme } from "@shopify/restyle";
+import { ScaledSize } from "react-native";
 
 import { palette } from "./palette";
 import { FontName } from "./fonts";
-import { Dimensions, ScaledSize } from "react-native";
-import { EdgeInsets } from "react-native-safe-area-context";
 
 export const theme = createTheme({
   colors: {
     primary: palette.blue,
     primaryText: palette.white,
 
-    background: palette.gray100,
+    background: palette.gray05,
     surface: palette.white,
     overlay: palette.white400,
 
     text: palette.gray900,
     textSecondary: palette.gray700,
-    textMuted: palette.gray300,
-
+    textMuted: palette.gray700,
     border: palette.gray100,
     error: palette.red,
     success: palette.green,
@@ -28,13 +27,13 @@ export const theme = createTheme({
   },
   spacing: {
     none: 0,
-    xxs: 2,
-    xs: 4,
-    s: 6,
-    m: 8,
-    l: 10,
-    xl: 12,
-    xxl: 20,
+    xxs: 4,
+    xs: 8,
+    s: 12,
+    m: 16,
+    l: 20,
+    xl: 24,
+    xxl: 32,
   },
   borderRadii: {
     none: 0,
@@ -87,24 +86,38 @@ export const theme = createTheme({
     },
   },
   textVariants: {
+    defaults: {
+      fontSize: 16,
+      color: "text",
+      fontFamily: FontName.Primary,
+      lineHeight: 24,
+      fontWeight: "normal",
+    },
     heading: {
-      fontSize: 24,
+      fontSize: 28,
       fontWeight: "bold",
       fontFamily: FontName.PrimaryBlack,
       color: "text",
-      lineHeight: 32,
+      lineHeight: 36,
     },
     subheading: {
-      fontSize: 20,
+      fontSize: 22,
       fontFamily: FontName.PrimaryBold,
       color: "text",
-      lineHeight: 28,
+      lineHeight: 30,
     },
     body: {
       fontSize: 16,
       color: "text",
       fontFamily: FontName.Primary,
       lineHeight: 24,
+      fontWeight: "normal",
+    },
+    small: {
+      fontSize: 14,
+      color: "text",
+      fontFamily: FontName.Primary,
+      lineHeight: 22,
       fontWeight: "normal",
     },
     caption: {
@@ -114,6 +127,14 @@ export const theme = createTheme({
       fontWeight: "normal",
       textTransform: "uppercase",
       lineHeight: 16,
+    },
+    buttonText: {
+      fontSize: 16,
+      color: "primaryText",
+      fontFamily: FontName.PrimaryBold,
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      lineHeight: 20,
     },
   },
 
@@ -137,12 +158,12 @@ export const darkTheme: Theme = {
   ...theme,
   colors: {
     ...theme.colors,
-    background: palette.gray900,
-    surface: palette.gray700,
+    background: palette.darkCharcoal,
+    surface: palette.black,
     overlay: palette.black400,
     text: palette.white,
     textSecondary: palette.gray300,
-    textMuted: palette.gray100,
+    textMuted: palette.gray300,
   },
   isDarkMode: true,
 };
