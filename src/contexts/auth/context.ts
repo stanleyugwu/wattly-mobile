@@ -1,15 +1,15 @@
 import { createContext } from "react";
 
-import type { AuthContextType } from "./type";
+import type { AuthContextType } from "./types";
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isSignedIn: false,
-  signIn(email, password) {
-    return Promise.resolve();
+  signIn(user) {
+    return;
   },
   signOut() {
-    return Promise.resolve();
+    return;
   },
 });

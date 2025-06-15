@@ -1,52 +1,47 @@
 import { useEffect, useState } from "react";
-import * as SplashScreen from "expo-splash-screen";
 
 import { storageService } from "@/services";
 import { STORE_KEYS } from "@/constants";
-import { User } from "@/types";
-import { apiClient } from "@/lib/api";
 import { AuthContext } from "./context";
 import { logger } from "@/lib/logger";
 import { authTokenRef } from "./tokenRef";
+import { User } from "@/types";
+import { router } from "expo-router";
 
 /**
  * AuthProvider component provides authentication context to the application.
  * It manages user authentication state, including sign-in and sign-out functionality.
- *
- * NOTE: Also handles manually hiding the splash screen after auth data is loaded
  */
 export const AuthProvider = (props: { children: React.ReactNode }) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const res = await apiClient.post("/auth/signin", { email, password });
-    } catch (error) {}
+  const signIn = (user: User) => {
+    setUserData(user);
+    storageService.setItem(STORE_KEYS.USER_DATA, user).then((stored) => {
+      if (stored) logger.info("AuthProvider:: persisted user data");
+    });
+    router.replace("/");
   };
 
-  const signOut = async () => {
-    // Implement your sign-out logic here
-    // For example, clear the user data and update the userData.
+  const signOut = () => {
     setUserData(null);
-    setIsLoading(false);
+    storageService.removeItem(STORE_KEYS.USER_DATA);
+    router.dismissTo("/auth/signin");
   };
 
   useEffect(() => {
     const fetchUserData = async () => {
+      // storageService.removeItem(STORE_KEYS.USER_DATA);
+      // return;
       const userData = await storageService.getItem<User>(STORE_KEYS.USER_DATA);
       authTokenRef.current = userData?.token || null;
 
-      setUserData(userData);
+      setUserData(userData || null);
       setIsLoading(false);
       logger.info(
         `AuthProvider:: User data loaded: ${JSON.stringify(userData)}`
       );
-
-      SplashScreen.hideAsync().catch((error) => {
-        logger.error(`SplashScreen:: Error hiding splash screen: ${error}`);
-      });
     };
 
     fetchUserData();

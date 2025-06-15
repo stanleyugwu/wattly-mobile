@@ -1,4 +1,4 @@
 export * from "./AuthProvider";
 export * from "./context";
 export * from "./useAuthContext";
-export * from "./type";
+export * from "./types";
