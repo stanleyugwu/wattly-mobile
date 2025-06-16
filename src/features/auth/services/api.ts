@@ -8,6 +8,12 @@ import {
   VerifySignupEmailResponse,
 } from "../signup/otp_verification/types";
 
+import {
+  ForgotPasswordResponse,
+  VerifyPasswordResetEmailReqPayload,
+  VerifyPasswordResetEmailResponse,
+} from "../forgot_password/types";
+
 import { SignInFormData, SignInResponse } from "../signin/types";
 
 import {
@@ -72,5 +78,28 @@ export const resendSignupOtp = async (email: string) => {
   const res = await apiClient.post<APIResponse<null>>(
     `/new-email-otp/${email}`
   );
+  return res.data;
+};
+
+export const forgotPassword = async (
+  email: string
+): Promise<ForgotPasswordResponse> => {
+  const res = await apiClient.post<
+    any,
+    AxiosResponse<ForgotPasswordResponse>,
+    { email: string }
+  >("/forgot-password", { email });
+  return res.data;
+};
+
+export const verifyPasswordResetEmail = async (
+  otp: string
+): Promise<VerifyPasswordResetEmailResponse> => {
+  const res = await apiClient.post<
+    any,
+    AxiosResponse<VerifyPasswordResetEmailResponse>,
+    VerifyPasswordResetEmailReqPayload
+  >(`/forget-verify-otp`, { otp });
+
   return res.data;
 };
