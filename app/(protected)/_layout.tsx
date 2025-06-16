@@ -1,12 +1,13 @@
-import { useAuthContext } from "@/contexts/auth";
 import { Redirect, Stack } from "expo-router";
 
+import { useAuth } from "@/contexts/auth";
+
 export default function ProtectedLayout() {
-  const auth = useAuthContext();
+  const auth = useAuth();
 
   if (!auth.isSignedIn) {
     // Redirect to login if not authenticated
-    return <Redirect href="/auth/signup" />;
+    return <Redirect href="/auth/signin" />;
   }
 
   return (
