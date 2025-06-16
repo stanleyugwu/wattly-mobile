@@ -14,6 +14,11 @@ import {
   VerifyPasswordResetEmailResponse,
 } from "../forgot_password/types";
 
+import {
+  PasswordResetReqPaylod,
+  PasswordResetResponse,
+} from "../password_reset/types";
+
 import { SignInFormData, SignInResponse } from "../signin/types";
 
 import {
@@ -101,5 +106,18 @@ export const verifyPasswordResetEmail = async (
     VerifyPasswordResetEmailReqPayload
   >(`/forget-verify-otp`, { otp });
 
+  return res.data;
+};
+
+export const resetPassword = async ({
+  email,
+  password,
+  password_confirmation,
+}: PasswordResetReqPaylod): Promise<PasswordResetResponse> => {
+  const res = await apiClient.post<
+    any,
+    AxiosResponse<APIResponse<null>>,
+    PasswordResetReqPaylod
+  >("/reset-password", { email, password, password_confirmation });
   return res.data;
 };
