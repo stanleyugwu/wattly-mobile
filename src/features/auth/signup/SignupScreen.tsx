@@ -1,0 +1,251 @@
+import { useMutation } from "react-query";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ScaledSheet } from "react-native-size-matters";
+import { KeyboardAvoidingView } from "react-native";
+import { router } from "expo-router";
+
+import { signUpSchema } from "./schema";
+import { Images } from "@assets/index";
+import { FontName } from "@/theme";
+import { Toast } from "@/lib/toast";
+import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
+import { signUp } from "../services/api";
+import { SignUpFormData } from "./types";
+
+const passwordRules =
+  "required: upper; required: lower; required: digit; max-consecutive: 2; minlength: 8;";
+
+export const SignupScreen = () => {
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    shouldUseNativeValidation: true,
+    shouldFocusError: true,
+  });
+
+  const { isLoading, mutate } = useMutation({
+    mutationFn: signUp,
+    onError(error: any) {
+      console.log(error);
+      Toast.error(error.message);
+    },
+    onSuccess(data) {
+      console.log(data);
+      const email = getValues("email");
+      router.replace({
+        pathname: "/auth/signup/otp_verification/[email]",
+        params: { email },
+      });
+    },
+  });
+
+  const handleSignup = handleSubmit((data) => {
+    console.log(data);
+    mutate(data);
+  });
+
+  return (
+    <KeyboardAvoidingView behavior="height">
+      <ScreenBox>
+        <Image source={Images.logo} style={styles.logo} contentFit="contain" />
+        <Text
+          variant={"heading"}
+          style={{ fontSize: 32 }}
+          mt={"s"}
+          textAlign={"center"}
+        >
+          Create your own{"\n"}account
+        </Text>
+        <Box
+          borderWidth={2}
+          borderColor={"text"}
+          my={"s"}
+          width={50}
+          borderRadius={"round"}
+          alignSelf={"center"}
+        />
+        <Text variant={"subheading"} color={"textMuted"} textAlign={"center"}>
+          Setup your account to get started
+        </Text>
+
+        <Box gap={"xxl"} pt={"xxl"}>
+          <Box gap={"xs"}>
+            <Text style={{ fontWeight: "black" }}>Full Name</Text>
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  autoFocus
+                  placeholder="Enter your full name"
+                  autoCapitalize="words"
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  error={errors.fullName?.message}
+                  returnKeyLabel="Next"
+                  returnKeyType="next"
+                  enterKeyHint="next"
+                />
+              )}
+            />
+          </Box>
+
+          <Box gap={"xs"}>
+            <Text style={{ fontWeight: "black" }}>Email Address</Text>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  placeholder="Enter your email address"
+                  keyboardType="email-address"
+                  onBlur={onBlur}
+                  autoCapitalize="none"
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.email?.message}
+                  returnKeyLabel="Next"
+                  returnKeyType="next"
+                  enterKeyHint="next"
+                />
+              )}
+            />
+          </Box>
+
+          <Box gap={"xs"}>
+            <Text style={{ fontWeight: "black" }}>Phone Number</Text>
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  autoComplete="tel"
+                  error={errors.phone?.message}
+                  returnKeyLabel="Next"
+                  returnKeyType="next"
+                  enterKeyHint="next"
+                />
+              )}
+            />
+          </Box>
+
+          <Box gap={"xs"}>
+            <Text>Password</Text>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  placeholder="Enter a password"
+                  secureTextEntry
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  passwordRules={passwordRules}
+                  error={errors.password?.message}
+                  returnKeyLabel="Next"
+                  returnKeyType="next"
+                  enterKeyHint="next"
+                />
+              )}
+            />
+          </Box>
+
+          <Box gap={"xs"}>
+            <Text>Confirm Password</Text>
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  placeholder="Re-enter your password"
+                  secureTextEntry
+                  onChangeText={onChange}
+                  value={value}
+                  onBlur={onBlur}
+                  passwordRules={passwordRules}
+                  error={errors.confirmPassword?.message}
+                  submitBehavior="blurAndSubmit"
+                  returnKeyLabel="Done"
+                  returnKeyType="done"
+                  enterKeyHint="done"
+                />
+              )}
+            />
+          </Box>
+
+          <Box gap={"xs"}>
+            <Text>Referrer Code (If someone referred you)</Text>
+            <Controller
+              control={control}
+              name="referralCode"
+              render={({ field: { onChange, value, onBlur } }) => (
+                <TextInput
+                  placeholder="Enter referral code"
+                  onChangeText={onChange}
+                  autoCapitalize="none"
+                  maxLength={11}
+                  onBlur={onBlur}
+                  value={value}
+                  error={errors.referralCode?.message}
+                  returnKeyLabel="Done"
+                  returnKeyType="done"
+                  enterKeyHint="done"
+                />
+              )}
+            />
+          </Box>
+
+          <Text
+            textAlign={"center"}
+            onPress={() => router.push("/auth/signin")}
+          >
+            Already have an account?{" "}
+            <Text
+              variant={"body"}
+              color={"primary"}
+              textDecorationLine={"underline"}
+              style={{ fontFamily: FontName.PrimaryBold }}
+              fontFamily={FontName.PrimaryBold}
+            >
+              Sign in
+            </Text>
+          </Text>
+
+          <Button
+            label="Create account"
+            loading={isLoading}
+            onPress={handleSignup}
+          />
+          <Text textAlign={"center"} mb={"l"}>
+            By continuing, you agree to our{"\n"}
+            <Text color={"primary"}>Terms of Use</Text> and{" "}
+            <Text color={"primary"}>Privacy Policy</Text>
+          </Text>
+        </Box>
+      </ScreenBox>
+    </KeyboardAvoidingView>
+  );
+};
+
+const styles = ScaledSheet.create({
+  logo: {
+    width: "200@s",
+    height: "75@s",
+    aspectRatio: 2 / 1,
+  },
+});
