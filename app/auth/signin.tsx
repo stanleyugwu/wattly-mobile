@@ -1,12 +1,5 @@
-import { Text, View } from "@/components/Themed";
+import { SigninScreen } from "@/features/auth";
 
-export default function SignInScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Sign In</Text>
-      <Text style={{ marginTop: 10 }}>
-        Please enter your credentials to sign in
-      </Text>
-    </View>
-  );
+export default function SignInScreenWrapper() {
+  return <SigninScreen />;
 }
