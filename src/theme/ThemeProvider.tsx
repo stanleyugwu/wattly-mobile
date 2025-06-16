@@ -1,5 +1,7 @@
 import { PropsWithChildren, useMemo } from "react";
 import { ThemeProvider as RestyleThemeProvider } from "@shopify/restyle";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useWindowDimensions } from "react-native";
 import {
   ThemeProvider as ReactNavigationThemeProvider,
   type Theme as ReactNavigationTheme,
@@ -7,8 +9,6 @@ import {
 
 import { darkTheme, theme as lightTheme, Theme } from "./theme";
 import { useSettings } from "@/contexts/settings";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useWindowDimensions } from "react-native";
 
 /**
  * ThemeProvider component that provides the theme context

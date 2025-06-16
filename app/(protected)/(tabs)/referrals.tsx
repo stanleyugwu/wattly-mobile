@@ -1,9 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { useAuth } from "@/contexts/auth";
-
-export default function TabOneScreen() {
-  const auth = useAuth();
+export default function TabTwoScreen() {
   return null;
 }
 
