@@ -1,19 +1,19 @@
-import { useMutation } from "react-query";
-import { KeyboardAvoidingView } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import React, { useState } from "react";
-import { router } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { KeyboardAvoidingView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { useMutation } from "react-query";
 
-import { FontName } from "@/theme";
-import { signInSchema } from "./schema";
-import { Images } from "@assets/index";
-import { Toast } from "@/lib/toast";
+import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
 import { logger } from "@/lib/logger";
-import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
+import { Toast } from "@/lib/toast";
+import { FontName } from "@/theme";
+import { Images } from "@assets/index";
 import { resendSignupOtp, signIn } from "../services/api";
+import { signInSchema } from "./schema";
 import { SignInFormData } from "./types";
 
 export const SigninScreen = () => {
@@ -134,7 +134,6 @@ export const SigninScreen = () => {
                   secureTextEntry
                   autoCapitalize={"none"}
                   placeholder="Enter your password"
-                  maxLength={11}
                   error={errors.password?.message}
                 />
               )}
