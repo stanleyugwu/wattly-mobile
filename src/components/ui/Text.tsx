@@ -2,14 +2,18 @@ import {
   createRestyleComponent,
   createText,
   createVariant,
+  ResponsiveValue,
+  useResponsiveProp,
   VariantProps,
 } from "@shopify/restyle";
 import { FC } from "react";
 
-import { Theme, useTheme } from "@/theme";
+import { Font, Theme, useTheme } from "@/theme";
 
 type TextProps = VariantProps<Theme, "textVariants"> &
-  React.ComponentProps<typeof TextBase>;
+  React.ComponentProps<typeof TextBase> & {
+    fontFamily?: ResponsiveValue<Font, Theme["breakpoints"]>;
+  };
 
 const TextBase = createText<Theme>();
 
@@ -24,20 +28,23 @@ export const ThemedText = createRestyleComponent<TextProps, Theme>(
  */
 export const Text: FC<TextProps> = (props) => {
   const theme = useTheme();
+  const color = useResponsiveProp(props.color);
+  const fontFamily = useResponsiveProp(props.fontFamily);
 
   return (
     <ThemedText
       {...props}
       adjustsFontSizeToFit={false}
       allowFontScaling={false}
-      style={
-        props.color
-          ? [
-              props.style,
-              { color: theme.colors[props.color as keyof Theme["colors"]] },
-            ]
-          : props.style
-      }
+      style={[
+        props.style,
+        color && {
+          color: theme.colors[color as keyof Theme["colors"]],
+        },
+        fontFamily && {
+          fontFamily: theme.fonts[fontFamily as keyof Theme["fonts"]],
+        },
+      ]}
     />
   );
 };
