@@ -1,11 +1,15 @@
 export const palette = {
   black: "#000000",
   black400: "rgba(0, 0, 0, 0.4)",
+  black100: "#0000001A",
+
   white: "#FFFFFF",
   white400: "rgba(255, 255, 255, 0.4)",
+  white50: "#FFFFFF0D",
 
   blue: "#229EFF", // primary
-  blue100: "#A3D6FD",
+  blue300: "#A3D6FD",
+  blue100: "#d8ebf9",
 
   orange: "#F8AF4E",
   green: "#00AB44",

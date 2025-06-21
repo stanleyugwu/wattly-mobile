@@ -1,9 +1,9 @@
-import { EdgeInsets } from "react-native-safe-area-context";
 import { createTheme } from "@shopify/restyle";
 import { ScaledSize } from "react-native";
+import { EdgeInsets } from "react-native-safe-area-context";
 
-import { palette } from "./palette";
 import { FontName } from "./fonts";
+import { palette } from "./palette";
 
 export const theme = createTheme({
   colors: {
@@ -21,6 +21,7 @@ export const theme = createTheme({
     error: palette.red,
     success: palette.green,
     warning: palette.orange,
+    shadow: palette.black100,
 
     white: palette.white,
     black: palette.black,
@@ -37,6 +38,7 @@ export const theme = createTheme({
   },
   borderRadii: {
     none: 0,
+    xs: 6,
     s: 10,
     m: 12,
     l: 16,
@@ -55,17 +57,18 @@ export const theme = createTheme({
     tooltip: 700,
     default: 100,
   },
-  surfaceVariants: {
+  boxVariant: {
     defaults: {},
-    regular: {
+    surface: {
       padding: {
         phone: "s",
         tablet: "m",
       },
       backgroundColor: "surface",
       borderRadius: {
-        phone: "s",
+        phone: "m",
         tablet: "m",
+        desktop: "l",
       },
     },
     elevated: {
@@ -75,13 +78,14 @@ export const theme = createTheme({
       },
       backgroundColor: "surface",
       borderRadius: {
-        phone: "s",
+        phone: "m",
         tablet: "m",
+        desktop: "l",
       },
-      shadowColor: "#000",
-      shadowOpacity: 0.2,
-      shadowOffset: { width: 0, height: 5 },
-      shadowRadius: 15,
+      shadowColor: "shadow",
+      shadowOpacity: 1,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 3,
       elevation: 5,
     },
   },
@@ -164,6 +168,7 @@ export const darkTheme: Theme = {
     text: palette.white,
     textSecondary: palette.gray300,
     textMuted: palette.gray300,
+    shadow: palette.white50,
   },
   isDarkMode: true,
 };
