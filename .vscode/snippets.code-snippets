@@ -1,0 +1,129 @@
+{
+	"Create new screen": {
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_scr",
+		"body": [
+			"import React, {type FC} from 'react';",
+			"import { ScaledSheet } from 'react-native-size-matters';",
+            "",
+			"import {ScreenBox} from '@/components';",
+			"",
+			"interface ${1:ScreenName}ScreenProps {",
+			"	$2",
+			"}",
+			"",
+			"/**",
+            " * Component for `${1:ScreenName}` screen",
+            " */",
+			"export const ${1:ScreenName}Screen:FC<${1:ScreenName}ScreenProps> = (props) => {",
+			"	return (",
+			"	  <ScreenBox>",
+			"		  $0",
+			"	  </ScreenBox>",
+			"	)"
+			"}",
+			"",
+			"${1:ScreenName}Screen.displayName = '${1:ScreenName}Screen'",
+			"",
+			"const styles = ScaledSheet.create({",
+			"	$3",
+			"});"
+			"",
+			""
+		],
+		"description": "Creates a new screen wrapped with `ScreenBox` component and styled with `ScaledSheet`"
+	},
+	"Create new component": {
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_cmp",
+		"body": [
+			"import { FC } from 'react';",
+			"import { ScaledSheet } from 'react-native-size-matters';",
+			"",
+			"interface ${1:ComponentName}Props {",
+			"	$2",
+			"}",
+			"",
+			"/**",
+			" * $3",
+			" */",
+			"export const ${1:ComponentName}:FC<${1:ComponentName}Props> = (props) => {",
+			"	return (",
+			"	  $0",
+			"	);",
+			"}",
+			"",
+			"const styles = ScaledSheet.create({",
+			"	$4",
+			"});",
+			""
+		],
+		"description": "Creates a new component with props interface and styled with `ScaledSheet`"
+	},
+	"Creates a new style prop with `styles.` prefix": {
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_style",
+		"body": [
+			"style={styles.${0}}"
+		],
+		"description": "creates a new style prop, with array value and `styles.` prefix"
+	},
+	"Creates a new useState hook": {
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_us",
+		"body": [
+			"const [${1:stateName}, set${1:stateName}] = useState();"
+		],
+		"description": "creates a new useState hook"
+	},
+	"shorthand for justifyContent:'center'":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "jcc",
+		"body": [
+			"justifyContent:\"center\",",
+		],
+		"description": "adds new flex center content justify style property"
+	},
+	"shorthand for alignItems:'center'":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "aic",
+		"body": [
+			"alignItems:\"center\",",
+		],
+		"description": "adds new flex center alignment style property"
+	},
+	"shorthand for flexDirection:'row'":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "fdr",
+		"body": [
+			"flexDirection:\"row\",",
+		],
+		"description": "adds new row flex-direction property"
+	},
+    "shorthand for adding color from Colors global object":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_color",
+		"body": [
+			"color={Colors.${0:white}}"
+		],
+		"description": "adds new color prop to Text or View component"
+	},
+    "shorthand for adding size to a Text component":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_size",
+		"body": [
+			"size={${0:16}}"
+		],
+		"description": "adds new size prop to Text component"
+	},
+    "shorthand for adding new style entry in StyleSheet style object":{
+		"scope": "javascript,typescript,typescriptreact,javascriptreact",
+		"prefix": "_ss",
+		"body": [
+			"${1:lorem}:{",
+            "   ${0}",
+            "},"
+		],
+		"description": "adds new size prop to Text component"
+	},
+}
