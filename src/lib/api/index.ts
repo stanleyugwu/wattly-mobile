@@ -1,13 +1,15 @@
-import { router } from "expo-router";
 import axios, { AxiosError } from "axios";
+import { router } from "expo-router";
 
-import { authTokenRef } from "@/contexts/auth/tokenRef";
-import { logger } from "../logger";
-import { storageService } from "@/services";
 import { STORE_KEYS } from "@/constants";
+import { authTokenRef } from "@/contexts/auth/tokenRef";
+import { storageService } from "@/services";
+import { logger } from "../logger";
 
 const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+  timeout: 10000,
+  timeoutErrorMessage: "Your request took too long, please try again",
   headers: {
     "Content-Type": "application/json",
   },
