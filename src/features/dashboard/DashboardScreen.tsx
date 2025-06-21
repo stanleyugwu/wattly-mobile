@@ -1,0 +1,151 @@
+import React, { type FC } from "react";
+import { scale, ScaledSheet, vs } from "react-native-size-matters";
+
+import { Box, NetworkError, ScreenBox, Text } from "@/components";
+import { BulbIcon, EllipsesIcon, PlusIcon } from "@/components/icons";
+import { useAuth } from "@/contexts/auth";
+import { useTheme } from "@/theme";
+import { AntDesign } from "@expo/vector-icons";
+import { Platform, Pressable, ScrollView } from "react-native";
+import { ElectricityTxSkeleton, useGetElectricityTxs } from "../electricity";
+import { useGetWalletTxs, WalletTxSkeleton } from "../wallet";
+import {
+  CurvyIconButton,
+  ElectricityTx,
+  NotificationIconBtn,
+  Wallet,
+  WalletTx,
+} from "./components";
+
+interface DashboardScreenProps {}
+
+/**
+ * Component for `Dashboard` screen
+ */
+export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
+  const { user } = useAuth();
+  const { palette } = useTheme();
+
+  const electrictyTxs = useGetElectricityTxs();
+  const walletTxs = useGetWalletTxs();
+
+  const electricityData = electrictyTxs.data?.slice(0, 2) || [];
+  const walletData = walletTxs.data || [];
+
+  return (
+    <ScreenBox rowGap={"xxl"}>
+      <Box
+        flexDirection={"row"}
+        alignItems={"center"}
+        justifyContent={"space-between"}
+      >
+        <Box>
+          <Text color={"textMuted"}>Good Day,</Text>
+          <Text fontFamily={"PrimaryBold"}>{user?.profile.name}</Text>
+        </Box>
+
+        <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
+          <NotificationIconBtn hasUnreadNotification={true} />
+          {/* TODO: add profile picture support */}
+          <Box
+            borderRadius={"round"}
+            padding={"xs"}
+            width={scale(45)}
+            height={scale(45)}
+            alignItems={"center"}
+            justifyContent={"center"}
+            style={{ backgroundColor: palette.blue100 }}
+          >
+            <AntDesign name="user" size={scale(25)} color={palette.gray900} />
+          </Box>
+        </Box>
+      </Box>
+
+      <Wallet />
+      <Box justifyContent={"center"} alignItems={"center"}>
+        <Box
+          width={"100%"}
+          height={vs(30)}
+          borderRadius={"round"}
+          style={{ backgroundColor: palette.blue100 }}
+        />
+        <ScrollView
+          style={styles.btnScrollView}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          <Box flexDirection={"row"} justifyContent={"space-between"}>
+            <CurvyIconButton label="Add Money" Icon={<PlusIcon />} />
+            <CurvyIconButton label="Electricity" Icon={<BulbIcon />} />
+            <CurvyIconButton label="See more" Icon={<EllipsesIcon />} />
+          </Box>
+        </ScrollView>
+      </Box>
+
+      <Box variant={"surface"} rg={"s"}>
+        {electricityData.length ? (
+          <Pressable style={{ alignItems: "center" }}>
+            <Box
+              bg={"primary"}
+              p={"xxs"}
+              alignSelf={"flex-start"}
+              px={"s"}
+              borderRadius={"xs"}
+            >
+              <Text variant={"small"} color={"primaryText"}>
+                Buy Again
+              </Text>
+            </Box>
+          </Pressable>
+        ) : null}
+
+        {/* Loader */}
+        <ElectricityTxSkeleton show={electrictyTxs.isLoading} />
+
+        {/* Render two transactions */}
+        {electricityData.map((tx) => (
+          <ElectricityTx tx={tx} key={tx.id} />
+        ))}
+
+        {/* Render error view */}
+        {electrictyTxs.isError ? (
+          <NetworkError
+            body="Couldn't fetch recent electricity transactions. Try again"
+            onRetry={electrictyTxs.refetch}
+          />
+        ) : null}
+
+        <Text variant={"body"} fontFamily={"PrimaryBold"}>
+          Recents
+        </Text>
+
+        {/* Loader */}
+        <WalletTxSkeleton show={walletTxs.isLoading} />
+        {walletTxs.isError ? (
+          <NetworkError
+            body="Couldn't fetch recent wallet transactions. Try again"
+            onRetry={walletTxs.refetch}
+          />
+        ) : null}
+
+        {/* Render wallet transactions */}
+        {walletData.map((tx) => (
+          <WalletTx tx={tx} key={tx.id} />
+        ))}
+      </Box>
+    </ScreenBox>
+  );
+};
+
+DashboardScreen.displayName = "DashboardScreen";
+
+const styles = ScaledSheet.create({
+  btnScrollView: {
+    flex: 1,
+    position: "absolute",
+    top: Platform.select({
+      android: -13,
+      ios: -10,
+    }),
+  },
+});
