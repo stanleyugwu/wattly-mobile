@@ -6,6 +6,7 @@ import { BulbIcon, EllipsesIcon, PlusIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
 import { useTheme } from "@/theme";
 import { AntDesign } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Platform, Pressable, ScrollView } from "react-native";
 import { ElectricityTxSkeleton, useGetElectricityTxs } from "../electricity";
 import { useGetWalletTxs, WalletTxSkeleton } from "../wallet";
@@ -76,7 +77,11 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
         >
           <Box flexDirection={"row"} justifyContent={"space-between"}>
             <CurvyIconButton label="Add Money" Icon={<PlusIcon />} />
-            <CurvyIconButton label="Electricity" Icon={<BulbIcon />} />
+            <CurvyIconButton
+              onPress={() => router.navigate("/electricity")}
+              label="Electricity"
+              Icon={<BulbIcon />}
+            />
             <CurvyIconButton label="See more" Icon={<EllipsesIcon />} />
           </Box>
         </ScrollView>

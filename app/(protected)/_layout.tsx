@@ -12,8 +12,33 @@ export default function ProtectedLayout() {
 
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false, title: "Home" }}
+      />
+      <Stack.Screen
+        name="electricity/index"
+        options={{
+          headerTitle: "",
+          title: "",
+        }}
+      />
+      <Stack.Screen
+        name="electricity/tx_details"
+        options={{
+          headerTitle: "Transaction Details",
+          title: "Transaction Details",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="electricity/tx_history"
+        options={{
+          headerTitle: "Electricity Transactions",
+          title: "Electricity Transactions",
+          headerBackTitle: "Top-up",
+        }}
+      />
     </Stack>
   );
 }

@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { electricityTopupSchema } from "./schema";
+
 export interface IElectricityTx {
   id: number;
   user_id: string;
@@ -11,6 +14,7 @@ export interface IElectricityTx {
   response: {
     code: string;
     content: {
+      errors?: string;
       transactions: {
         status: string;
         product_name: string;
@@ -83,3 +87,71 @@ export enum ElectricityProviders {
   EKEDC = "EKEDC",
   IKEDC = "IKEDC",
 }
+
+export type MeterType = "prepaid" | "postpaid";
+
+export interface ElectricityProvider {
+  name: string;
+  serviceId: string;
+  logo: string;
+}
+
+export type ElectricityTopupFormData = z.infer<typeof electricityTopupSchema>;
+
+export interface SavedBeneficiary {
+  id: string;
+  provider: ElectricityProvider;
+  meterNo: string;
+  meterName: string;
+  meterType: MeterType;
+}
+
+export interface IMeterInfo {
+  code: string;
+  content: {
+    error?: string;
+    Customer_Name: string;
+    Address: string;
+    Meter_Number: string;
+    Customer_Arrears: string;
+    Minimum_Amount: string;
+    Min_Purchase_Amount: string;
+    Can_Vend: "yes" | "no";
+    Business_Unit: string;
+    Customer_Account_Type: string;
+    Meter_Type: "PREPAID" | "POSTPAID";
+    WrongBillersCode: boolean;
+    commission_details: {
+      amount: null | string;
+      rate: string;
+      rate_type: string;
+      computation_type: string;
+    };
+  };
+}
+
+export interface IElectricityTopupResData extends IElectricityTx {}
+
+export type GetMeterInfoReqPayload = {
+  billers_code: string;
+  service_id: ElectricityProvider["serviceId"];
+  type: MeterType;
+};
+
+export type ElectricityTopupReqPayload = {
+  service_id: string;
+  /** Meter Number */
+  billers_code: string;
+  /** Meter Type */
+  variation_code: MeterType;
+  amount: string;
+  phone: string;
+};
+
+/**
+ * This will be the type of the ref used to hold transaction data for tx details
+ * screen to access and render
+ */
+export type TxDetailRef = {
+  details: IElectricityTx | null;
+};
