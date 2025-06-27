@@ -1,24 +1,12 @@
 import { FC } from "react";
 
 import { Box, Image, Text } from "@/components";
+import { IElectricityTx } from "@/features/electricity/types";
 import {
-  IElectricityTx,
-  ElectricityProviders as Provider,
-} from "@/features/electricity/types";
-import { createStyleHook } from "@/lib/utils";
-import { Images, RemoteImages } from "@assets/index";
-
-let getValidValue = (...args: string[]) => {
-  for (let a of args) if (a && a != "N/A") return a;
-};
-
-const providerToLogo = {
-  [Provider.EEDC]: RemoteImages.eedcLogo,
-  [Provider.AEDC]: RemoteImages.aedcLogo,
-  [Provider.EKEDC]: RemoteImages.ekedc,
-  [Provider.IBEDC]: RemoteImages.ibedc,
-  [Provider.IKEDC]: RemoteImages.ikedc,
-};
+  createStyleHook,
+  getElectricityProviderLogoFromText,
+  getFirstValidValue,
+} from "@/lib/utils";
 
 interface ElectricityTxProps {
   tx: IElectricityTx;
@@ -30,20 +18,18 @@ interface ElectricityTxProps {
 export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
   const { styles } = useTheme();
 
-  // TODO: find more efficient way to determine provider and map to logo
-  const providerName = tx?.response?.content?.transactions?.product_name || "";
   // E.g product name: "Ikeja Electric Payment - IKEDC"
+  const providerName = tx?.response?.content?.transactions?.product_name || "";
 
-  const meterNo = getValidValue(
+  const meterNo = getFirstValidValue(
     tx?.response?.meterNumber,
     tx?.response?.content?.transactions?.phone,
     tx?.response?.token
   );
 
-  const providerAbbrv = providerName.split("-")[1]?.trim() as Provider;
-  // E.g providerAbbrv: "IKEDC"
-
-  const providerLogo = providerToLogo[providerAbbrv] ?? Images.iconSmall;
+  const providerLogo = getElectricityProviderLogoFromText(
+    tx?.response?.content?.transactions?.product_name
+  );
 
   return (
     <Box bg={"background"} p="s" borderRadius={"s"}>

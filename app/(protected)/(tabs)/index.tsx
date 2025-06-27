@@ -1,5 +1,5 @@
 import { DashboardScreen } from "@/features/dashboard";
 
-export default function TabOneScreen() {
+export default function DashboardScreenContainer() {
   return <DashboardScreen />;
 }

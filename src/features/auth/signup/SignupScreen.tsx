@@ -1,17 +1,17 @@
-import { useMutation } from "react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ScaledSheet } from "react-native-size-matters";
 import { KeyboardAvoidingView } from "react-native";
-import { router } from "expo-router";
+import { ScaledSheet } from "react-native-size-matters";
+import { useMutation } from "react-query";
 
-import { signUpSchema } from "./schema";
-import { Images } from "@assets/index";
-import { FontName } from "@/theme";
-import { Toast } from "@/lib/toast";
 import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
+import { Toast } from "@/lib/toast";
+import { FontName } from "@/theme";
+import { Images } from "@assets/index";
 import { signUp } from "../services/api";
+import { signUpSchema } from "./schema";
 import { SignUpFormData } from "./types";
 
 const passwordRules =
@@ -72,7 +72,7 @@ export const SignupScreen = () => {
           borderRadius={"round"}
           alignSelf={"center"}
         />
-        <Text variant={"subheading"} color={"textMuted"} textAlign={"center"}>
+        <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
           Setup your account to get started
         </Text>
 

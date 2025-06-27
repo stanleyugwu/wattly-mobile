@@ -98,7 +98,7 @@ export const SigninScreen = () => {
           borderRadius={"round"}
           alignSelf={"center"}
         />
-        <Text variant={"subheading"} color={"textMuted"} textAlign={"center"}>
+        <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
           Welcome back, please login to continue
         </Text>
 
