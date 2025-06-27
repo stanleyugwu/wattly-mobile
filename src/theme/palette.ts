@@ -5,6 +5,7 @@ export const palette = {
 
   white: "#FFFFFF",
   white400: "rgba(255, 255, 255, 0.4)",
+  white600: "rgba(255, 255, 255, 0.6)",
   white50: "#FFFFFF0D",
 
   blue: "#229EFF", // primary
@@ -13,6 +14,7 @@ export const palette = {
 
   orange: "#F8AF4E",
   green: "#00AB44",
+  green200: "rgba(0, 171, 68, 0.2)",
 
   eerieBlack: "#121212",
   darkCharcoal: "#1E1E1E",

@@ -1,18 +1,27 @@
-import "react-native-reanimated";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-reanimated";
 import {
   initialWindowMetrics,
   SafeAreaProvider,
 } from "react-native-safe-area-context";
 import { QueryClientProvider } from "react-query";
 
-import { useLoadAssets } from "@/hooks";
-import { AuthProvider } from "@/contexts/auth";
-import { SettingsProvider } from "@/contexts/settings";
-import { AppThemeProvider } from "@/theme";
-import { queryClient } from "@/config/queryClient";
 import { BaseToast } from "@/components/ui";
+import { queryClient } from "@/config/queryClient";
+import { AuthProvider } from "@/contexts/auth";
+import { OverlayLoaderProvider } from "@/contexts/overlay";
+import { SettingsProvider } from "@/contexts/settings";
+import { useLoadAssets } from "@/hooks";
+import { AppThemeProvider } from "@/theme";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import { Host as PortalizeHost } from "react-native-portalize";
+
+// add support for extended date formatting
+dayjs.extend(advancedFormat);
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -39,27 +48,34 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <SettingsProvider>
-            <AppThemeProvider>
-              <Stack>
-                <Stack.Screen
-                  name="(protected)"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="modal"
-                  options={{ presentation: "modal" }}
-                />
-                <Stack.Screen name="auth" options={{ headerShown: false }} />
-              </Stack>
-              <BaseToast />
-            </AppThemeProvider>
-          </SettingsProvider>
-        </QueryClientProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <SettingsProvider>
+              <AppThemeProvider>
+                <BottomSheetModalProvider>
+                  <PortalizeHost>
+                    <OverlayLoaderProvider>
+                      <Stack>
+                        <Stack.Screen
+                          name="(protected)"
+                          options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                          name="auth"
+                          options={{ headerShown: false }}
+                        />
+                      </Stack>
+                    </OverlayLoaderProvider>
+                    <BaseToast />
+                  </PortalizeHost>
+                </BottomSheetModalProvider>
+              </AppThemeProvider>
+            </SettingsProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

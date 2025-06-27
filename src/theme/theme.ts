@@ -12,7 +12,7 @@ export const theme = createTheme({
 
     background: palette.gray05,
     surface: palette.white,
-    overlay: palette.white400,
+    overlay: palette.white600,
 
     text: palette.gray900,
     textSecondary: palette.gray700,
@@ -25,6 +25,7 @@ export const theme = createTheme({
 
     white: palette.white,
     black: palette.black,
+    transparent: "transparent",
   },
   spacing: {
     none: 0,
@@ -104,11 +105,18 @@ export const theme = createTheme({
       color: "text",
       lineHeight: 36,
     },
-    subheading: {
-      fontSize: 22,
+    heading2: {
+      fontSize: 24,
+      fontWeight: "bold",
       fontFamily: FontName.PrimaryBold,
       color: "text",
-      lineHeight: 30,
+      lineHeight: 32,
+    },
+    heading3: {
+      fontSize: 20,
+      fontFamily: FontName.PrimaryBold,
+      color: "text",
+      lineHeight: 28,
     },
     body: {
       fontSize: 16,
@@ -126,8 +134,8 @@ export const theme = createTheme({
     },
     caption: {
       fontSize: 12,
-      color: "textMuted",
-      fontFamily: FontName.PrimaryLight,
+      color: "text",
+      fontFamily: FontName.Primary,
       fontWeight: "normal",
       textTransform: "uppercase",
       lineHeight: 16,
@@ -169,6 +177,7 @@ export const darkTheme: Theme = {
     textSecondary: palette.gray300,
     textMuted: palette.gray300,
     shadow: palette.white50,
+    transparent: "transparent",
   },
   isDarkMode: true,
 };

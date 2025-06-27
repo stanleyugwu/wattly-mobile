@@ -1,10 +1,10 @@
+import { Octicons } from "@expo/vector-icons";
 import { FC, Fragment, useState } from "react";
 import {
   TextInput as BaseTextInput,
   TextInputProps as BaseTextInputProps,
   Pressable,
 } from "react-native";
-import { Octicons } from "@expo/vector-icons";
 import { scale, ScaledSheet } from "react-native-size-matters";
 
 import { useTheme } from "@/theme";
@@ -38,12 +38,14 @@ export const TextInput: FC<TextInputProps> = ({
         secureTextEntry={secureTextEntry ? passwordVisible : false}
         placeholderTextColor={isDarkMode ? palette.gray700 : palette.gray300}
         style={[
-          style,
           styles.textInput,
+          {
+            fontSize: textVariants.body.fontSize,
+          },
+          style,
           {
             borderColor: error ? palette.red : palette.gray300,
             color: colors.text,
-            fontSize: textVariants.body.fontSize,
           },
         ]}
       />

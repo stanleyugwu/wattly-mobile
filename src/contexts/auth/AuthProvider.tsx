@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
-import { storageService } from "@/services";
 import { STORE_KEYS } from "@/constants";
-import { AuthContext } from "./context";
 import { logger } from "@/lib/logger";
-import { authTokenRef } from "./tokenRef";
+import { storageService } from "@/services";
 import { User } from "@/types";
 import { router } from "expo-router";
+import { AuthContext } from "./context";
+import { authTokenRef } from "./tokenRef";
 
 /**
  * AuthProvider component provides authentication context to the application.
@@ -18,6 +18,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
 
   const signIn = (user: User) => {
     setUserData(user);
+    authTokenRef.current = user.token;
     storageService.setItem(STORE_KEYS.USER_DATA, user).then((stored) => {
       if (stored) logger.info("AuthProvider:: persisted user data");
     });
@@ -27,6 +28,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
   const signOut = () => {
     setUserData(null);
     storageService.removeItem(STORE_KEYS.USER_DATA);
+    authTokenRef.current = null;
     router.dismissTo("/auth/signin");
   };
 
