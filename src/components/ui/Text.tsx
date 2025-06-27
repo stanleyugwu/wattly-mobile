@@ -10,7 +10,7 @@ import { FC } from "react";
 
 import { Font, Theme, useTheme } from "@/theme";
 
-type TextProps = VariantProps<Theme, "textVariants"> &
+export type TextProps = VariantProps<Theme, "textVariants"> &
   React.ComponentProps<typeof TextBase> & {
     fontFamily?: ResponsiveValue<Font, Theme["breakpoints"]>;
   };
