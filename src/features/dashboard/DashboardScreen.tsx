@@ -76,7 +76,11 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           showsHorizontalScrollIndicator={false}
         >
           <Box flexDirection={"row"} justifyContent={"space-between"}>
-            <CurvyIconButton label="Add Money" Icon={<PlusIcon />} />
+            <CurvyIconButton
+              label="Add Money"
+              Icon={<PlusIcon />}
+              onPress={() => router.navigate("/(protected)/wallet/add_money")}
+            />
             <CurvyIconButton
               onPress={() => router.navigate("/electricity")}
               label="Electricity"

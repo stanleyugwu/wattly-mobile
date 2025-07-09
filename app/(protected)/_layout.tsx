@@ -39,6 +39,13 @@ export default function ProtectedLayout() {
           headerBackTitle: "Top-up",
         }}
       />
+      <Stack.Screen
+        name="wallet/add_money"
+        options={{
+          headerTitle: "Wallet Top-up",
+          title: "Wallet Top-up",
+        }}
+      />
     </Stack>
   );
 }
