@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
+import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
 import React, { useRef, type FC } from "react";
 import { Pressable } from "react-native";
@@ -7,6 +8,7 @@ import { s } from "react-native-size-matters";
 import ViewShot, { captureRef } from "react-native-view-shot";
 
 import { Box, Button, Image, ScreenBox, Text, TextProps } from "@/components";
+import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import {
   createStyleHook,
@@ -65,8 +67,15 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
     return null;
   }
 
-  const handleCopyToken = () => {
-    console.log("COPIED");
+  const handleCopyToken = async () => {
+    try {
+      await Clipboard.setStringAsync(token, {
+        inputFormat: Clipboard.StringFormat.PLAIN_TEXT,
+      });
+      Toast.success("Token copied");
+    } catch (error) {
+      logger.error("ElectricityTxDetailsScreen:: Failed to copy token");
+    }
     Toast.success("Token copied");
   };
 
