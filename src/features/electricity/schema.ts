@@ -1,7 +1,7 @@
 import { z } from "zod";
+import { PHONE_NUMBER_REGEX } from "../auth/signup/schema";
 
 const AMOUNT_REGEX = /^(?!0+$)\d+(\.\d{1,2})?$/;
-const PHONE_NUMBER_REGEX = /^[0-9]{11}$/;
 
 export const electricityTopupSchema = z.object({
   provider: z.object({
@@ -13,12 +13,9 @@ export const electricityTopupSchema = z.object({
   }),
   meterNumber: z.string().min(5, "Enter a valid meter no."),
   meterType: z.enum(["prepaid", "postpaid"]),
-  phone: z
-    .string()
-    // .transform((val) => (val === "" ? undefined : val)) // treat empty as undefined
-    .refine((val) => PHONE_NUMBER_REGEX.test(val), {
-      message: "Enter a valid phone number",
-    }),
+  phone: z.string().refine((val) => PHONE_NUMBER_REGEX.test(val), {
+    message: "Enter a valid phone number",
+  }),
   amount: z
     .string()
     .trim()
