@@ -7,6 +7,7 @@ import { useMutation } from "react-query";
 
 import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
+import { QueryKeys } from "@/lib/api";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { FontName } from "@/theme";
@@ -31,6 +32,7 @@ export const SigninScreen = () => {
 
   const { isLoading: isSigningIn, mutate } = useMutation({
     mutationFn: signIn,
+    mutationKey: QueryKeys.signIn,
     onError(error: any) {
       Toast.error(error.message);
     },

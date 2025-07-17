@@ -7,6 +7,7 @@ import { ScaledSheet } from "react-native-size-matters";
 import { useMutation } from "react-query";
 
 import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
+import { QueryKeys } from "@/lib/api";
 import { Toast } from "@/lib/toast";
 import { FontName } from "@/theme";
 import { Images } from "@assets/index";
@@ -33,6 +34,7 @@ export const SignupScreen = () => {
 
   const { isLoading, mutate } = useMutation({
     mutationFn: signUp,
+    mutationKey: QueryKeys.signUp,
     onError(error: any) {
       console.log(error);
       Toast.error(error.message);

@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { scale, ScaledSheet } from "react-native-size-matters";
+import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView } from "react-native";
+import { scale, ScaledSheet } from "react-native-size-matters";
 import { useMutation } from "react-query";
 
+import { Box, Button, Image, OTPField, ScreenBox, Text } from "@/components";
+import { QueryKeys } from "@/lib/api";
+import { logger } from "@/lib/logger";
+import { Toast } from "@/lib/toast";
 import { FontName, useTheme } from "@/theme";
 import { Images } from "@assets/index";
-import { Toast } from "@/lib/toast";
-import { logger } from "@/lib/logger";
-import { verifyPasswordResetEmail, forgotPassword } from "../services/api";
-import { Box, Button, Image, OTPField, ScreenBox, Text } from "@/components";
+import { forgotPassword, verifyPasswordResetEmail } from "../services/api";
 
 const OTP_COUNT = 6;
 const COUNTDOWN = 30;
@@ -25,6 +26,7 @@ export const ForgotPasswordOtpVerificationScreen = () => {
 
   const { isLoading: isVerifyingOtp, mutate } = useMutation({
     mutationFn: verifyPasswordResetEmail,
+    mutationKey: QueryKeys.verifyPasswordResetEmail,
     onSuccess(data) {
       console.log(data);
       router.navigate({

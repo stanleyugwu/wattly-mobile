@@ -1,16 +1,17 @@
-import { useMutation } from "react-query";
-import React, { useCallback, useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { scale, ScaledSheet } from "react-native-size-matters";
+import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView } from "react-native";
+import { scale, ScaledSheet } from "react-native-size-matters";
+import { useMutation } from "react-query";
 
-import { Box, Text } from "@/components/ui";
-import { FontName, useTheme } from "@/theme";
 import { ScreenBox } from "@/components/layout";
 import { Button, Image, OTPField } from "@/components/shared";
-import { Images } from "@assets/index";
-import { Toast } from "@/lib/toast";
+import { Box, Text } from "@/components/ui";
+import { QueryKeys } from "@/lib/api";
 import { logger } from "@/lib/logger";
+import { Toast } from "@/lib/toast";
+import { FontName, useTheme } from "@/theme";
+import { Images } from "@assets/index";
 import { resendSignupOtp, verifySignupEmail } from "../../services/api";
 
 const OTP_COUNT = 6;
@@ -27,6 +28,7 @@ export const SignupOtpVerificationScreen = () => {
 
   const { isLoading: isVerifyingOtp, mutate } = useMutation({
     mutationFn: verifySignupEmail,
+    mutationKey: QueryKeys.verifySignupEmail,
     onSuccess(data) {
       console.log(data);
       router.dismissTo("/auth/signup/otp_verified");

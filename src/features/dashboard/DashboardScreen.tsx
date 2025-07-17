@@ -163,7 +163,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
         {/* Render wallet transactions */}
         {walletData.map((tx) => (
-          <WalletTx tx={tx} />
+          <WalletTx tx={tx} key={tx.id} />
         ))}
       </Box>
     </ScreenBox>

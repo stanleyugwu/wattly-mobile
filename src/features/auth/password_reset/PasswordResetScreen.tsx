@@ -1,18 +1,19 @@
-import { KeyboardAvoidingView } from "react-native";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { useMutation } from "react-query";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { KeyboardAvoidingView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
+import { useMutation } from "react-query";
 
-import { Images } from "@assets/index";
 import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
-import { resetPassword } from "../services/api";
+import { QueryKeys } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
+import { Images } from "@assets/index";
+import { resetPassword } from "../services/api";
 import { passwordResetSchema } from "./schema";
 import { PasswordResetFormData } from "./types";
-import { logger } from "@/lib/logger";
 
 const passwordRules =
   "required: upper; required: lower; required: digit; max-consecutive: 2; minlength: 8;";
@@ -31,6 +32,7 @@ export const PasswordResetScreen = () => {
 
   const { mutate, isLoading: isResettingPassword } = useMutation({
     mutationFn: resetPassword,
+    mutationKey: QueryKeys.resetPassword,
     onSuccess(data) {
       console.log(data);
       router.dismissTo("/auth/password/reset/reset_successful");
