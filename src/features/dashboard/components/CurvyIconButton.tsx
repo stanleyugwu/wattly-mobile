@@ -21,7 +21,7 @@ export const CurvyIconButton: FC<CurvyIconButtonProps> = ({
   const { palette } = useTheme();
 
   return (
-    <TouchableOpacity {...rest} activeOpacity={0.7}>
+    <TouchableOpacity {...rest} activeOpacity={1}>
       <Box
         flexDirection={"row"}
         alignItems={"center"}

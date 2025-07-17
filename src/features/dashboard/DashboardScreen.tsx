@@ -2,14 +2,15 @@ import React, { type FC } from "react";
 import { scale, ScaledSheet, vs } from "react-native-size-matters";
 
 import { Box, NetworkError, ScreenBox, Text } from "@/components";
-import { BulbIcon, EllipsesIcon, PlusIcon } from "@/components/icons";
+import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
 import { useTheme } from "@/theme";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Platform, Pressable, ScrollView } from "react-native";
 import { ElectricityTxSkeleton, useGetElectricityTxs } from "../electricity";
-import { useGetWalletTxs, WalletTxSkeleton } from "../wallet";
+import { useGetTransferHistory } from "../transfer";
+import { WalletTxSkeleton } from "../wallet";
 import {
   CurvyIconButton,
   ElectricityTx,
@@ -28,10 +29,10 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
   const { palette } = useTheme();
 
   const electrictyTxs = useGetElectricityTxs();
-  const walletTxs = useGetWalletTxs();
+  const walletTxs = useGetTransferHistory();
 
   const electricityData = electrictyTxs.data?.slice(0, 2) || [];
-  const walletData = walletTxs.data || [];
+  const walletData = walletTxs.data?.slice(0, 5) || [];
 
   return (
     <ScreenBox rowGap={"xxl"}>
@@ -82,18 +83,25 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
               onPress={() => router.navigate("/(protected)/wallet/add_money")}
             />
             <CurvyIconButton
-              onPress={() => router.navigate("/electricity")}
+              onPress={() => router.navigate("/(protected)/electricity")}
               label="Electricity"
               Icon={<BulbIcon />}
             />
-            <CurvyIconButton label="See more" Icon={<EllipsesIcon />} />
+            <CurvyIconButton
+              label="Transfer"
+              Icon={<TransferIcon />}
+              onPress={() => router.navigate("/(protected)/transfer")}
+            />
           </Box>
         </ScrollView>
       </Box>
 
       <Box variant={"surface"} rg={"s"}>
         {electricityData.length ? (
-          <Pressable style={{ alignItems: "center" }}>
+          <Pressable
+            style={{ alignItems: "center" }}
+            onPress={() => router.navigate("/(protected)/electricity")}
+          >
             <Box
               bg={"primary"}
               p={"xxs"}
@@ -124,9 +132,25 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           />
         ) : null}
 
-        <Text variant={"body"} fontFamily={"PrimaryBold"}>
-          Recents
-        </Text>
+        <Box
+          mt={"m"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+          flexDirection={"row"}
+        >
+          <Text variant={"body"} fontFamily={"PrimaryBold"}>
+            Recent Transactions
+          </Text>
+          <Text
+            variant={"small"}
+            color={"primary"}
+            onPress={() =>
+              router.navigate("/(protected)/transfer/transfer_history")
+            }
+          >
+            See more
+          </Text>
+        </Box>
 
         {/* Loader */}
         <WalletTxSkeleton show={walletTxs.isLoading} />
@@ -139,7 +163,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
         {/* Render wallet transactions */}
         {walletData.map((tx) => (
-          <WalletTx tx={tx} key={tx.id} />
+          <WalletTx tx={tx} />
         ))}
       </Box>
     </ScreenBox>
