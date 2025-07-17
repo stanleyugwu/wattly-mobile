@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/contexts/auth";
 import { useOverlayLoader } from "@/contexts/overlay_loader";
 import { useSuccessOverlay } from "@/contexts/success_overlay";
+import { queryClient, QueryKeys } from "@/lib/api";
 import { Toast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/utils";
 import { Images } from "@assets/index";
@@ -65,6 +66,12 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
         ctaLabel: "View receipt",
         onCTAPress: () => {
           successOverlay.hide();
+          queryClient.invalidateQueries({
+            queryKey: QueryKeys.getTransferTxs,
+            exact: true,
+            fetching: true,
+          });
+
           router.dismissTo({
             pathname: "/(protected)/transfer/transfer_details/[reference]",
             params: {

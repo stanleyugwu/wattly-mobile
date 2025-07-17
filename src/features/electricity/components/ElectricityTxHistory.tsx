@@ -126,5 +126,6 @@ const useStyles = createStyleHook(({ borderRadii }) => ({
     width: "40@s",
     height: "40@s",
     aspectRatio: 1 / 1,
+    borderRadius: borderRadii.round,
   },
 }));

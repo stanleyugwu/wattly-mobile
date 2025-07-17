@@ -19,6 +19,7 @@ import { s, scale } from "react-native-size-matters";
 import { Box, ScreenBox, Text, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
 import { useOverlayLoader } from "@/contexts/overlay_loader";
+import { queryClient, QueryKeys } from "@/lib/api";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { createStyleHook, formatCurrency } from "@/lib/utils";
@@ -212,6 +213,11 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           Toast.success("Electricity top-up successful");
           txDetailRef.details = data; // temp store tx details
           router.replace("/(protected)/electricity/tx_details");
+          queryClient.invalidateQueries({
+            queryKey: QueryKeys.getElectricityTxs,
+            exact: true,
+            fetching: true,
+          });
         };
 
         // Prompt to save as beneficiary
