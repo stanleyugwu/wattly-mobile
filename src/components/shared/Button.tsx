@@ -1,13 +1,13 @@
 import React, { FC } from "react";
-import { ScaledSheet } from "react-native-size-matters";
 import {
+  ActivityIndicator,
   TouchableOpacity,
   TouchableOpacityProps,
-  ActivityIndicator,
 } from "react-native";
+import { ScaledSheet } from "react-native-size-matters";
 
-import { Text } from "../ui";
 import { palette } from "@/theme/palette";
+import { Text } from "../ui";
 
 export interface ButtonProps extends TouchableOpacityProps {
   label: string;
@@ -38,7 +38,13 @@ export const Button: FC<ButtonProps> = ({
     {loading ? (
       <ActivityIndicator color={palette.white} size={20} />
     ) : (
-      <Text textAlign={"center"} variant={"buttonText"}>
+      <Text
+        textAlign={"center"}
+        variant={"body"}
+        fontFamily={"PrimaryBold"}
+        color={"white"}
+        width={"100%"}
+      >
         {label}
       </Text>
     )}
