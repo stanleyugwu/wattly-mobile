@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useMutation } from "react-query";
 
@@ -79,98 +78,96 @@ export const SigninScreen = () => {
   });
 
   return (
-    <KeyboardAvoidingView behavior="height">
-      <ScreenBox>
-        <Image source={Images.logo} style={styles.logo} contentFit="contain" />
-        <Text
-          variant={"heading"}
-          style={{ fontSize: 32 }}
-          mt={"s"}
-          textAlign={"center"}
-        >
-          Login
-        </Text>
-        <Box
-          borderWidth={2}
-          borderColor={"text"}
-          my={"s"}
-          width={30}
-          borderRadius={"round"}
-          alignSelf={"center"}
-        />
-        <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
-          Welcome back, please login to continue
-        </Text>
+    <ScreenBox inkeyboardView inSafeArea={{ top: false }}>
+      <Image source={Images.logo} style={styles.logo} contentFit="contain" />
+      <Text
+        variant={"heading"}
+        style={{ fontSize: 32 }}
+        mt={"s"}
+        textAlign={"center"}
+      >
+        Login
+      </Text>
+      <Box
+        borderWidth={2}
+        borderColor={"text"}
+        my={"s"}
+        width={30}
+        borderRadius={"round"}
+        alignSelf={"center"}
+      />
+      <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
+        Welcome back, please login to continue
+      </Text>
 
-        <Box gap={"xxl"} pt={"xxl"}>
-          <Box gap={"xs"}>
-            <Text style={{ fontWeight: "black" }}>Email</Text>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  autoFocus
-                  placeholder="Enter your email address"
-                  value={value}
-                  onChangeText={onChange}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  error={errors.email?.message}
-                />
-              )}
-            />
-          </Box>
-
-          <Box gap={"xs"}>
-            <Text>Password</Text>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  onChangeText={onChange}
-                  value={value}
-                  secureTextEntry
-                  autoCapitalize={"none"}
-                  placeholder="Enter your password"
-                  error={errors.password?.message}
-                />
-              )}
-            />
-          </Box>
-
-          <Text
-            textAlign={"center"}
-            textDecorationLine={"underline"}
-            color={"primary"}
-            onPress={() => router.navigate("/auth/password/forgot")}
-          >
-            Forgot Password
-          </Text>
-          <Button
-            label="Sign In"
-            onPress={handleSignIn}
-            loading={isSigningIn || sendingOtp}
+      <Box gap={"xxl"} pt={"xxl"}>
+        <Box gap={"xs"}>
+          <Text style={{ fontWeight: "black" }}>Email</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                autoFocus
+                placeholder="Enter your email address"
+                value={value}
+                onChangeText={onChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={errors.email?.message}
+              />
+            )}
           />
-          <Text
-            textAlign={"center"}
-            onPress={() => router.navigate("/auth/signup")}
-          >
-            Don't have an account?{" "}
-            <Text
-              variant={"body"}
-              color={"primary"}
-              textDecorationLine={"underline"}
-              style={{ fontFamily: FontName.PrimaryBold }}
-              fontFamily={FontName.PrimaryBold}
-            >
-              Sign up
-            </Text>
-          </Text>
         </Box>
-      </ScreenBox>
-    </KeyboardAvoidingView>
+
+        <Box gap={"xs"}>
+          <Text>Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                onChangeText={onChange}
+                value={value}
+                secureTextEntry
+                autoCapitalize={"none"}
+                placeholder="Enter your password"
+                error={errors.password?.message}
+              />
+            )}
+          />
+        </Box>
+
+        <Text
+          textAlign={"center"}
+          textDecorationLine={"underline"}
+          color={"primary"}
+          onPress={() => router.navigate("/auth/password/forgot")}
+        >
+          Forgot Password
+        </Text>
+        <Button
+          label="Sign In"
+          onPress={handleSignIn}
+          loading={isSigningIn || sendingOtp}
+        />
+        <Text
+          textAlign={"center"}
+          onPress={() => router.navigate("/auth/signup")}
+        >
+          Don't have an account?{" "}
+          <Text
+            variant={"body"}
+            color={"primary"}
+            textDecorationLine={"underline"}
+            style={{ fontFamily: FontName.PrimaryBold }}
+            fontFamily={FontName.PrimaryBold}
+          >
+            Sign up
+          </Text>
+        </Text>
+      </Box>
+    </ScreenBox>
   );
 };
 

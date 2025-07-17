@@ -135,7 +135,7 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   const txSuccessful = isElectricityTxSuccessful(tx);
 
   return (
-    <ScreenBox inSafeArea={false}>
+    <ScreenBox inSafeArea={{ top: false }}>
       <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1 }}>
         <Box rg={"l"}>
           <Box variant={"surface"} alignItems={"center"} rg={"s"}>
