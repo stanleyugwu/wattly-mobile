@@ -39,6 +39,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
+          headerShown: true,
+          headerTitle: "Transaction History",
           title: "History",
           tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
         }}

@@ -1,22 +1,5 @@
-import { StyleSheet } from "react-native";
+import { TransferHistoryScreen } from "@/features/transfer";
 
-export default function TabTwoScreen() {
-  return null;
+export default function HistoryScreenWrapper() {
+  return <TransferHistoryScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-});
