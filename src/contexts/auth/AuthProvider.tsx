@@ -32,6 +32,23 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
     router.dismissTo("/auth/signin");
   };
 
+  const setTxPin = (pin: string) => {
+    if (!userData?.profile) return router.navigate("/auth/signin");
+
+    const newData: User = {
+      ...userData,
+      profile: {
+        ...userData?.profile!,
+        transaction_pin: pin,
+      },
+    };
+    setUserData(newData);
+    storageService.setItem(STORE_KEYS.USER_DATA, newData).then((stored) => {
+      if (stored)
+        logger.info("AuthProvider:: transfer pin set and user persisted");
+    });
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       // storageService.removeItem(STORE_KEYS.USER_DATA);
@@ -56,6 +73,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
         isLoading,
         signIn,
         signOut,
+        setTxPin,
         isSignedIn: !!userData,
       }}
     >

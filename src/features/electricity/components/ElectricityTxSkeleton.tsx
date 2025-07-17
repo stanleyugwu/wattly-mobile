@@ -3,18 +3,19 @@ import { useTheme } from "@/theme";
 import { Skeleton } from "moti/skeleton";
 import { FC } from "react";
 
-export const ElectricityTxSkeleton: FC<{ show: boolean }> = ({ show }) => {
+export const ElectricityTxSkeleton: FC<{ show: boolean; count?: number }> = ({
+  show,
+  count = 2,
+}) => {
   const { isDarkMode, borderRadii, colors } = useTheme();
   const colorMode = isDarkMode ? "dark" : "light";
 
   if (!show) return null;
 
-  const items = new Array(2).fill(1);
-
   return (
     <Skeleton.Group show={show}>
       <Box rg={"xs"}>
-        {items.map((_, idx) => (
+        {Array.from({ length: count }).map((_, idx) => (
           <Box
             key={idx}
             flexDirection={"row"}

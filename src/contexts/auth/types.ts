@@ -6,4 +6,5 @@ export interface AuthContextType {
   isSignedIn: boolean;
   signIn: (user: User) => void;
   signOut: () => void;
+  setTxPin: (pin: string) => void;
 }
