@@ -1,25 +1,32 @@
-import React from "react";
 import { Tabs } from "expo-router";
+import React from "react";
 
-import { useTheme } from "@/theme";
-import { useClientOnlyValue } from "@/hooks";
+import { MyQrCodeTabButton } from "@/components";
 import {
   HistoryIcon,
   HomeIcon,
   ProfileIcon,
   ReferralsIcon,
 } from "@/components/icons";
+import { useTheme } from "@/theme";
 
 export default function TabLayout() {
-  const { colors } = useTheme();
+  const { colors, palette, isDarkMode, borderRadii } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, false),
+        headerShown: false,
+        tabBarStyle: {
+          borderRadius: borderRadii.xl,
+          borderTopWidth: 0,
+          elevation: 10,
+          shadowOffset: { height: 1, width: 0 },
+          shadowColor: isDarkMode ? palette.white400 : palette.black400,
+          shadowRadius: 10,
+          shadowOpacity: 1,
+        },
       }}
     >
       <Tabs.Screen
@@ -34,6 +41,16 @@ export default function TabLayout() {
         options={{
           title: "History",
           tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="my_qrcode"
+        options={{
+          title: "",
+          tabBarLabel: "",
+          tabBarButton({ onPress, style }) {
+            return <MyQrCodeTabButton onPress={onPress} style={style} />;
+          },
         }}
       />
       <Tabs.Screen
