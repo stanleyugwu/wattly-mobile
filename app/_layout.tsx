@@ -11,8 +11,9 @@ import { QueryClientProvider } from "react-query";
 import { BaseToast } from "@/components/ui";
 import { queryClient } from "@/config/queryClient";
 import { AuthProvider } from "@/contexts/auth";
-import { OverlayLoaderProvider } from "@/contexts/overlay";
+import { OverlayLoaderProvider } from "@/contexts/overlay_loader";
 import { SettingsProvider } from "@/contexts/settings";
+import { OverlaySuccessProvider } from "@/contexts/success_overlay";
 import { useLoadAssets } from "@/hooks";
 import { AppThemeProvider } from "@/theme";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -56,18 +57,20 @@ function RootLayoutNav() {
               <AppThemeProvider>
                 <BottomSheetModalProvider>
                   <PortalizeHost>
-                    <OverlayLoaderProvider>
-                      <Stack>
-                        <Stack.Screen
-                          name="(protected)"
-                          options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                          name="auth"
-                          options={{ headerShown: false }}
-                        />
-                      </Stack>
-                    </OverlayLoaderProvider>
+                    <OverlaySuccessProvider>
+                      <OverlayLoaderProvider>
+                        <Stack>
+                          <Stack.Screen
+                            name="(protected)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="auth"
+                            options={{ headerShown: false }}
+                          />
+                        </Stack>
+                      </OverlayLoaderProvider>
+                    </OverlaySuccessProvider>
                     <BaseToast />
                   </PortalizeHost>
                 </BottomSheetModalProvider>
