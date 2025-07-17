@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PHONE_NUMBER_REGEX } from "../auth/signup/schema";
 
-const AMOUNT_REGEX = /^(?!0+$)\d+(\.\d{1,2})?$/;
+export const AMOUNT_REGEX = /^(?!0+$)\d+(\.\d{1,2})?$/;
 
 export const electricityTopupSchema = z.object({
   provider: z.object({

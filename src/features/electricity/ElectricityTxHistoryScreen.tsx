@@ -1,11 +1,10 @@
 import React, { useMemo, type FC } from "react";
-import { s, ScaledSheet } from "react-native-size-matters";
+import { s } from "react-native-size-matters";
 
 import { Box, Button, Text } from "@/components";
-import { getFirstValidValue } from "@/lib/utils";
+import { getFirstValidValue, groupAndSortRecords } from "@/lib/utils";
 import { useTheme } from "@/theme";
 import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
-import dayjs from "dayjs";
 import { router } from "expo-router";
 import {
   DefaultSectionT,
@@ -13,36 +12,11 @@ import {
   SectionListData,
   SectionListRenderItem,
 } from "react-native";
-import { ElectricityTxHistory } from "./components";
+import { ElectricityTxHistory, ElectricityTxSkeleton } from "./components";
 import { useGetElectricityTxs } from "./hooks";
 import { IElectricityTx } from "./types";
 
-export function groupAndSortTransactions(transactions: IElectricityTx[]) {
-  const grouped = transactions.reduce((acc, tx) => {
-    const txDate = getFirstValidValue(
-      tx?.response?.transaction_date,
-      tx.updated_at
-    );
-    const month = dayjs(txDate || new Date()).format("MMMM YYYY");
-    if (!acc[month]) acc[month] = [];
-    acc[month].push(tx);
-    return acc;
-  }, {} as Record<string, IElectricityTx[]>);
-
-  const sortedSections = Object.entries(grouped)
-    .sort(([a], [b]) => {
-      const dateA = dayjs(a, "MMMM YYYY");
-      const dateB = dayjs(b, "MMMM YYYY");
-      return dateB.valueOf() - dateA.valueOf(); // descending
-    })
-    .map(([month, data]) => ({
-      title: month,
-      data,
-    }));
-
-  return sortedSections;
-}
-
+// TODO: sort by latest and add pull-to-refresh
 interface ElectricityTxHistoryScreenProps {}
 
 /**
@@ -52,10 +26,13 @@ export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
   props
 ) => {
   const { data: txs, isLoading } = useGetElectricityTxs();
-  const { spacing, colors } = useTheme();
+  const { spacing, colors, insets } = useTheme();
 
   const sections = useMemo(
-    () => groupAndSortTransactions(txs || []) || [],
+    () =>
+      groupAndSortRecords(txs || [], (tx) =>
+        getFirstValidValue(tx?.response?.transaction_date, tx.updated_at)
+      ) || [],
     [txs]
   );
 
@@ -104,7 +81,8 @@ export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
   };
 
   return (
-    <Box p={{ phone: "m" }}>
+    <Box p={{ phone: "m" }} style={{ paddingBottom: insets.bottom }}>
+      <ElectricityTxSkeleton show={isLoading} count={5} />
       <SectionList
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderNoTxView}
@@ -119,5 +97,3 @@ export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
 };
 
 ElectricityTxHistoryScreen.displayName = "ElectricityTxHistoryScreen";
-
-const styles = ScaledSheet.create({});

@@ -4,3 +4,4 @@ export * from "./ElectricityScreen";
 export * from "./ELectricityTxDetailsScreen";
 export * from "./ElectricityTxHistoryScreen";
 export * from "./hooks";
+export { AMOUNT_REGEX } from "./schema";

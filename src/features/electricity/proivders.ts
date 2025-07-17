@@ -1,6 +1,7 @@
 import { RemoteImages } from "@assets/index";
 import { ElectricityProvider } from "./types";
 
+// TODO: remove
 export const PROVIDERS: ElectricityProvider[] = [
   {
     logo: RemoteImages.eedcLogo,

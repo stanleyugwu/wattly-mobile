@@ -18,7 +18,7 @@ import { s, scale } from "react-native-size-matters";
 
 import { Box, ScreenBox, Text, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
-import { useOverlayLoader } from "@/contexts/overlay";
+import { useOverlayLoader } from "@/contexts/overlay_loader";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { createStyleHook, formatCurrency } from "@/lib/utils";
@@ -43,6 +43,7 @@ import {
 } from "./types";
 import { isElectricityTxSuccessful } from "./utils";
 
+// TODO: create custom bottom sheet component that overlays screen headers and use here
 let meterInfoRequestController = new AbortController();
 
 const PREFILL_AMOUNTS = [
@@ -74,7 +75,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
   const { control, handleSubmit, setValue, reset, getValues, setError } =
     useForm<ElectricityTopupFormData>({
       resolver: zodResolver(electricityTopupSchema),
-      mode: "all",
+      mode: "onSubmit",
       defaultValues: { meterType: "prepaid" },
       reValidateMode: "onChange",
       shouldUseNativeValidation: true,
@@ -206,13 +207,12 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
       const successful = isElectricityTxSuccessful(data);
       if (successful) {
         const completeTopup = () => {
+          // successfully recharged, pass tx to details screen for viewing and sharing
+          loader.hide();
+          Toast.success("Electricity top-up successful");
           txDetailRef.details = data; // temp store tx details
           router.replace("/(protected)/electricity/tx_details");
-          loader.hide();
         };
-
-        // successfully recharged, pass tx to details screen for viewing and sharing
-        Toast.success("Electricity top-up successful");
 
         // Prompt to save as beneficiary
         const newBeneficiary = {
@@ -229,8 +229,9 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           ({ id, ...rest }) =>
             JSON.stringify(rest) === JSON.stringify(newBeneficiary)
         );
-        if (beneficiaryExists)
-          Alert.prompt(
+
+        if (!beneficiaryExists)
+          Alert.alert(
             "Save Beneficiary?",
             "Do you want to save this beneficiary for easier top-up on your next recharge?",
             [
@@ -240,6 +241,9 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
                 isPreferred: true,
                 text: "Yes",
                 onPress: () => {
+                  Toast.success("Beneficiary saved successfully", {
+                    position: "top",
+                  });
                   saveBeneficiary({
                     ...newBeneficiary,
                     id: `beneficiary-${Date.now()}`,
@@ -249,6 +253,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               },
             ]
           );
+        else completeTopup();
       } else {
         throw Error(
           `Top-up failed.\n${data.response.response_description}\n${data.response.content?.errors}`
@@ -287,7 +292,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
         data.content?.error ||
         !data.content?.Customer_Name
       )
-        throw Error();
+        throw Error("Meter verification failed");
 
       setMeterInfo({
         verifying: false,
