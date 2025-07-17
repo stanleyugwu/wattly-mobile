@@ -17,17 +17,10 @@ export function groupAndSortRecords<T>(
     return acc;
   }, {} as Record<string, GroupableRecords<T>>);
 
-  const sortedSections = Object.entries(grouped)
-    .map(([month, data]) => ({
-      title: month,
-      data,
-    }))
-    .sort((a, b) => {
-      const dateA = dayjs(a.title, "MMMM");
-      const dateB = dayjs(b.title, "MMMM");
-
-      return dateB.valueOf() - dateA.valueOf(); // descending
-    });
+  const sortedSections = Object.entries(grouped).map(([month, data]) => ({
+    title: month,
+    data,
+  }));
 
   return sortedSections;
 }
