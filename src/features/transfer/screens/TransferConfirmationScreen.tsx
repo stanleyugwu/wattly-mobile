@@ -68,8 +68,6 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
           successOverlay.hide();
           queryClient.invalidateQueries({
             queryKey: QueryKeys.getTransferTxs,
-            exact: true,
-            fetching: true,
           });
 
           router.dismissTo({

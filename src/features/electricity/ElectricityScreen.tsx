@@ -215,8 +215,6 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           router.replace("/(protected)/electricity/tx_details");
           queryClient.invalidateQueries({
             queryKey: QueryKeys.getElectricityTxs,
-            exact: true,
-            fetching: true,
           });
         };
 
