@@ -41,13 +41,13 @@ export const OverlayLoaderProvider: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-const useStyles = createStyleHook(({ layout, colors, zIndices }) => ({
+const useStyles = createStyleHook(({ colors, zIndices }) => ({
   overlay: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: layout.screen.width,
-    height: layout.screen.height,
+    bottom: 0,
+    right: 0,
     backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",

@@ -4,6 +4,8 @@ export const Images = {
   iconSmall: require("./images/icon_small.png"),
   success: require("./images/success_image.png"),
   wallet: require("./images/wallet_img.png"),
+  checkmark: require("./images/checkmark.png"),
+  sitting_illustration: require("./images/person_sitting_illustration.png"),
 };
 
 export const RemoteImages = {
