@@ -9,7 +9,7 @@ export const WalletTxSkeleton: FC<{ show: boolean }> = ({ show }) => {
 
   if (!show) return null;
 
-  const items = new Array(4).fill(1);
+  const items = Array.from({ length: 4 });
 
   return (
     <Skeleton.Group show={show}>
