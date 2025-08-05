@@ -5,8 +5,8 @@ import { Box, Button, OTPField, ScreenBox, Text } from "@/components";
 import { useAuth } from "@/contexts/auth";
 import { useSuccessOverlay } from "@/contexts/success_overlay";
 import { Toast } from "@/lib/toast";
+import { createTransactionPin } from "@/services/api";
 import { router } from "expo-router";
-import { createTransactionPin } from "../api";
 
 interface CreateTransferPinScreenProps {}
 

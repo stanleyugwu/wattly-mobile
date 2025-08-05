@@ -1,3 +1,4 @@
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState, type FC } from "react";
 import { ScaledSheet } from "react-native-size-matters";
 
@@ -16,10 +17,10 @@ import { useAuth } from "@/contexts/auth";
 import { useOverlayLoader } from "@/contexts/overlay_loader";
 import { useSuccessOverlay } from "@/contexts/success_overlay";
 import { queryClient, QueryKeys } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { formatCurrency } from "@/lib/utils";
 import { Images } from "@assets/index";
-import { router, useLocalSearchParams } from "expo-router";
 import { transfer } from "../api";
 import { PinInputs } from "../components";
 import { TransferDetailsScreenParams } from "./TransferDetailsScreen";
@@ -35,7 +36,7 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
   props
 ) => {
   const pinSheetRef = useRef<BottomSheetRef>(null);
-  const { user } = useAuth();
+  const { user, syncProfile, signOut } = useAuth();
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
 
@@ -57,6 +58,19 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
         transaction_pin: pin,
       });
 
+      // handle faulty transaction
+      const newBalance = (+user?.profile.balance! || 0) - (+amount || 0);
+      if (newBalance < 0) {
+        signOut();
+        logger.error(
+          "User performed successfull transaction with insufficient wallet balance"
+        );
+      }
+
+      syncProfile({
+        ...user?.profile!,
+        balance: newBalance.toString(),
+      });
       Toast.success("Transfer successful");
       successOverlay.show({
         headingText: "Transfer successful",
@@ -72,10 +86,8 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
 
           router.dismissTo({
             pathname: "/(protected)/transfer/transfer_details/[reference]",
-            params: {
-              ...res,
-              created_at: res.created_at || new Date().toDateString(),
-            } as TransferDetailsScreenParams,
+            // @ts-expect-error
+            params: res as TransferDetailsScreenParams,
           });
         },
       });

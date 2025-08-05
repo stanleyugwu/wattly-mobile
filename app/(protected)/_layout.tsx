@@ -84,10 +84,38 @@ export default function ProtectedLayout() {
         }}
       />
       <Stack.Screen
-        name="wallet/add_money"
+        name="transfer/pin/change"
+        options={{
+          headerTitle: "Change Pin",
+          headerBackTitle: "Settings",
+        }}
+      />
+      <Stack.Screen
+        name="transfer/pin/reset_otp_verification"
+        options={{
+          headerTitle: "",
+          headerBackTitle: "Settings",
+        }}
+      />
+      <Stack.Screen
+        name="transfer/pin/reset/[otp]"
+        options={{
+          headerTitle: "Reset Pin",
+          headerBackTitle: "Settings",
+        }}
+      />
+      <Stack.Screen
+        name="wallet/add_money/index"
         options={{
           headerTitle: "Wallet Top-up",
           title: "Wallet Top-up",
+        }}
+      />
+      <Stack.Screen
+        name="wallet/add_money/[payment_url]"
+        options={{
+          headerTitle: "Wallet Top Up",
+          headerBackTitle: "Cancel",
         }}
       />
     </Stack>

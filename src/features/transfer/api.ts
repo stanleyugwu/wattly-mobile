@@ -4,7 +4,6 @@ import { apiClient } from "@/lib/api";
 import { APIResponse } from "@/types";
 import {
   TransferReqPayload,
-  TransferResPayload,
   TransferTransaction,
   VerifyAccountResPayload,
 } from "./types";
@@ -24,24 +23,15 @@ export const verifyAccount = async (
   return res.data.data;
 };
 
-export const createTransactionPin = async (pin: string) => {
-  const res = await apiClient.post<
-    any,
-    AxiosResponse<APIResponse<null>>,
-    { transaction_pin: string; transaction_pin_confirmation: string }
-  >("/set-pin", { transaction_pin: pin, transaction_pin_confirmation: pin });
-  return res.data.data;
-};
-
 export const transfer = async ({
   account_number,
   amount,
   description,
   transaction_pin,
-}: TransferReqPayload): Promise<TransferResPayload> => {
+}: TransferReqPayload): Promise<TransferTransaction> => {
   const res = await apiClient.post<
     any,
-    AxiosResponse<APIResponse<TransferResPayload>>,
+    AxiosResponse<APIResponse<TransferTransaction>>,
     TransferReqPayload
   >("/transfer", {
     account_number,
@@ -54,7 +44,7 @@ export const transfer = async ({
 
 export const getTransferHistory = async (): Promise<TransferTransaction[]> => {
   const res = await apiClient.get<APIResponse<TransferTransaction[]>>(
-    "/transaction"
+    "/transactions/single"
   );
   return res.data.data;
 };

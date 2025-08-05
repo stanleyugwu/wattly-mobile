@@ -1,0 +1,168 @@
+import { router } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
+import { scale, ScaledSheet } from "react-native-size-matters";
+import { useMutation } from "react-query";
+
+import { Box, Button, OTPField, ScreenBox, Text } from "@/components";
+import { useAuth } from "@/contexts/auth";
+import { QueryKeys } from "@/lib/api";
+import { logger } from "@/lib/logger";
+import { Toast } from "@/lib/toast";
+import { FontName, useTheme } from "@/theme";
+import {
+  forgotTransferPin,
+  verifyTransferPinResetOtp,
+} from "../../account/profile/api";
+
+const OTP_COUNT = 6;
+const COUNTDOWN = 30;
+
+export const TransferPinOtpScreen = () => {
+  const { colors } = useTheme();
+  const { user } = useAuth();
+  const email = user?.profile.email!;
+
+  const [otp, setOtp] = useState<string>("");
+  const [countdown, setCountdown] = useState(COUNTDOWN);
+  const [resendingOtp, setResendingOtp] = useState(false);
+  const [otpError, setOtpError] = useState(false);
+
+  const { isLoading: isVerifyingOtp, mutateAsync } = useMutation({
+    mutationFn: verifyTransferPinResetOtp,
+    mutationKey: QueryKeys.verifyTransferPinResetOtp,
+  });
+
+  const handleVerifyOtp = async (otp: string) => {
+    if (!isVerifyingOtp && !resendingOtp) {
+      try {
+        await mutateAsync({ email, otp });
+        router.navigate({
+          pathname: "/(protected)/transfer/pin/reset/[otp]",
+          params: {
+            otp,
+            email,
+          },
+        });
+      } catch (error: any) {
+        setOtpError(true);
+        Toast.error(error.message);
+      }
+    }
+  };
+
+  const handleOtpInput = useCallback((_otp: string) => {
+    setOtpError(false);
+    setOtp(_otp);
+    // auto verify upon complete entry
+    if (_otp.length === OTP_COUNT) handleVerifyOtp(_otp);
+  }, []);
+
+  const handleResendOtp = () => {
+    setResendingOtp(true);
+    forgotTransferPin(email)
+      .then((res) => {
+        Toast.success(`New OTP Sent to ${email}`);
+      })
+      .catch((error) => {
+        logger.error(`TransferPinOtp:: OTP Not Resent: ${error}`);
+        Toast.error("OTP not resent, Please try again");
+      })
+      .finally(() => {
+        setResendingOtp(false);
+        setCountdown(COUNTDOWN);
+      });
+  };
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, []);
+
+  return (
+    <ScreenBox inkeyboardView inSafeArea={{ top: false }}>
+      <Text
+        variant={"heading"}
+        style={{ fontSize: 32 }}
+        mt={"s"}
+        textAlign={"center"}
+      >
+        Let's verify{"\n"}it's you!
+      </Text>
+      <Box
+        borderWidth={2}
+        borderColor={"text"}
+        my={"s"}
+        width={30}
+        borderRadius={"round"}
+        alignSelf={"center"}
+      />
+      <Text variant={"body"} textAlign={"center"}>
+        A one-time pin (OTP) code has been sent to{" "}
+        <Text style={{ fontFamily: FontName.PrimaryBold }}>{email}</Text>.
+        Please enter the code below to verify your identity and continue with
+        pin reset.
+      </Text>
+
+      <Box gap={"xxl"} pt={"xxl"} flex={1}>
+        <OTPField
+          isError={otpError}
+          cellCount={OTP_COUNT}
+          onChangeText={handleOtpInput}
+        />
+        {countdown === 0 ? (
+          !resendingOtp &&
+          !isVerifyingOtp && (
+            <Text
+              onPress={handleResendOtp}
+              textAlign={"center"}
+              textDecorationLine={"underline"}
+              variant={"body"}
+              color={"primary"}
+              style={{ fontFamily: FontName.PrimaryBold }}
+            >
+              Resend code
+            </Text>
+          )
+        ) : (
+          <Text textAlign={"center"}>
+            Resend code in{" "}
+            <Text style={{ fontFamily: FontName.PrimaryBold }}>
+              {countdown}
+            </Text>
+          </Text>
+        )}
+
+        {(isVerifyingOtp || resendingOtp) && (
+          <Box gap={"xs"} alignItems={"center"}>
+            <ActivityIndicator size={scale(25)} color={colors.primary} />
+            <Text variant={"small"}>
+              {isVerifyingOtp ? "Verifying OTP..." : "Resending OTP..."}
+            </Text>
+          </Box>
+        )}
+
+        <Button
+          label="Confirm"
+          disabled={!otp || otp.length !== OTP_COUNT || resendingOtp}
+          loading={isVerifyingOtp}
+          style={{ marginTop: 40 }}
+          onPress={() => handleVerifyOtp(otp)}
+        />
+      </Box>
+    </ScreenBox>
+  );
+};
+
+const styles = ScaledSheet.create({
+  logo: {
+    width: "200@s",
+    height: "75@s",
+    aspectRatio: 2 / 1,
+  },
+});

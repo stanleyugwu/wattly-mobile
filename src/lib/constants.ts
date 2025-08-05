@@ -1,0 +1,1 @@
+export const PROFILE_PIC_BASE_URL = `${process.env.EXPO_PUBLIC_PROFILE_PIC_UPLOAD_URL}/`;
