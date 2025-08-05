@@ -54,7 +54,7 @@ axiosInstance.interceptors.response.use(
     ) {
       // Handle unauthorized access, e.g., redirect to login
       logger.info("Unauthorized access - redirecting to login");
-      router.push("/auth/signin");
+      router.dismissTo("/auth/signin");
       storageService.removeItem(STORE_KEYS.USER_DATA);
     }
     return Promise.reject(error);

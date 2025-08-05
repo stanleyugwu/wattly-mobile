@@ -1,13 +1,23 @@
 import * as Clipboard from "expo-clipboard";
-import React, { type FC } from "react";
-import { Pressable } from "react-native";
+import React, { useRef, useState, type FC } from "react";
+import { Keyboard, Pressable } from "react-native";
 import { s, ScaledSheet } from "react-native-size-matters";
 
-import { Box, Button, ScreenBox, Text } from "@/components";
+import {
+  BottomSheet,
+  BottomSheetRef,
+  Box,
+  Button,
+  ScreenBox,
+  Text,
+  TextInput,
+} from "@/components";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { useTheme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { getPaymentRef } from "./api";
 
 interface DetailBoxProps {
   detail: string;
@@ -45,34 +55,102 @@ interface AddMoneyToWalletScreenProps {}
  * Component for `AddMoneyToWallet` screen
  */
 export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
+  const [loading, setLoading] = useState(false);
+  const amountSheetRef = useRef<BottomSheetRef>(null);
+  const [amount, setAmount] = useState("");
+
   const BANK_NAME = "Providus Bank";
   const ACCOUNT_NUMBER = "0561435285";
   const ACCOUNT_NAME = "Wattly Wallet Top-up";
 
+  const amtInsufficient =
+    !parseFloat(amount) || +amount < 100 || +amount > 1000000;
+
+  const handleFlutterwaveTopUp = async () => {
+    try {
+      setLoading(true);
+      Keyboard.dismiss();
+
+      const ref = await getPaymentRef(amount);
+      if (ref?.payment_url && ref?.reference) {
+        amountSheetRef.current?.close();
+
+        router.navigate({
+          pathname: "/(protected)/wallet/add_money/[payment_url]",
+          params: {
+            payment_url: ref.payment_url,
+            reference: ref.reference,
+          },
+        });
+      } else throw new Error("Failed to get payment reference");
+    } catch (error: any) {
+      logger.error(error.message);
+      Toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ScreenBox inSafeArea={false} rg={"s"}>
-      <Box variant={"surface"}>
-        <Text>
-          Use the details below to send money to your Wattlypay Account from any
-          bank's app or through internet banking
+    <>
+      <ScreenBox inSafeArea={false} rg={"s"}>
+        <Box variant={"surface"}>
+          <Text>
+            Use the details below to send money to your Wattlypay Account from
+            any bank's app or through internet banking
+          </Text>
+        </Box>
+        <Box variant={"surface"} rg={"xs"}>
+          <Text mt={"s"}>Bank Name</Text>
+          <DetailBox detail={BANK_NAME} />
+
+          <Text mt={"s"}>Account Number</Text>
+          <DetailBox detail={ACCOUNT_NUMBER} />
+
+          <Text mt={"s"}>Account Name</Text>
+          <DetailBox detail={ACCOUNT_NAME} />
+        </Box>
+
+        <Text textAlign={"center"} my={"l"}>
+          Or
         </Text>
-      </Box>
-      <Box variant={"surface"} rg={"xs"}>
-        <Text mt={"s"}>Bank Name</Text>
-        <DetailBox detail={BANK_NAME} />
 
-        <Text mt={"s"}>Account Number</Text>
-        <DetailBox detail={ACCOUNT_NUMBER} />
+        <Button
+          label="Top up with Flutterwave"
+          onPress={() => amountSheetRef.current?.expand()}
+        />
+      </ScreenBox>
 
-        <Text mt={"s"}>Account Name</Text>
-        <DetailBox detail={ACCOUNT_NAME} />
-      </Box>
+      <BottomSheet
+        enableDynamicSizing={false}
+        index={-1}
+        keyboardBehavior="extend"
+        snapPoints={["70%"]}
+        ref={amountSheetRef}
+      >
+        <Box flex={1} rg={"xs"}>
+          <Text variant={"heading3"} textAlign={"center"}>
+            Wallet Top Up
+          </Text>
 
-      <Text textAlign={"center"} my={"l"}>
-        Or
-      </Text>
-      <Button label="Top up with Flutterwave" />
-    </ScreenBox>
+          <Box mt={"xxl"} rg={"l"}>
+            <TextInput
+              keyboardType="numeric"
+              inputMode="decimal"
+              value={amount}
+              onChangeText={(text) => setAmount(text.trim())}
+              placeholder="Amount to fund"
+            />
+            <Button
+              label="Continue"
+              disabled={amtInsufficient}
+              onPress={handleFlutterwaveTopUp}
+              loading={loading}
+            />
+          </Box>
+        </Box>
+      </BottomSheet>
+    </>
   );
 };
 
