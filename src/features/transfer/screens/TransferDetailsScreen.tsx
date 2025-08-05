@@ -29,12 +29,12 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
     recipient_name,
     reference,
     created_at,
-    acct_no,
+    recipient_account_number,
     // @ts-expect-error
   } = useLocalSearchParams<TransferDetailsScreenParams>();
   const { palette } = useTheme();
   const { user } = useAuth();
-  const isSender = sender_id === user?.profile.id?.toString();
+  const isSender = sender_id === user?.profile?.id;
 
   const transferDate = dayjs(created_at).format("Do MMMM YYYY h:mm A");
 
@@ -74,7 +74,10 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
             value={isSender ? recipient_name : sender_name}
           />
           {isSender ? (
-            <DetailText label="Account Number" value={acct_no} />
+            <DetailText
+              label="Account Number"
+              value={recipient_account_number.toString()}
+            />
           ) : null}
           <DetailText label="Transaction ID" value={reference} />
           <Box rg={"xs"}>

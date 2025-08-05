@@ -24,7 +24,7 @@ export const TransferTx: FC<TransferTxProps> = ({ tx }) => {
   const { palette } = useTheme();
 
   const txDate = dayjs(tx.updated_at).format("Do MMMM h:mm A") || "N/A";
-  const isSender = tx.sender_id === user?.profile.id?.toString();
+  const isSender = tx.sender_id === user?.profile.id;
 
   return (
     <Pressable
@@ -62,9 +62,7 @@ export const TransferTx: FC<TransferTxProps> = ({ tx }) => {
           </Box>
           <Box>
             <Text>
-              {(isSender ? tx.recipient_name : tx.sender_name) || isSender
-                ? "Transfer Out"
-                : "Transfer In"}
+              {(isSender ? tx.recipient_name : tx.sender_name) || "Sent"}
             </Text>
             <Text variant={"caption"}>{txDate}</Text>
           </Box>
