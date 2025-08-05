@@ -16,9 +16,10 @@ export interface User {
     forgot_password_token: null;
     balance: string;
     transaction_pin: string;
-    account_number: number;
+    account_number: string;
     created_at: string;
     updated_at: string;
+    profile?: string;
   };
   token: string;
 }
