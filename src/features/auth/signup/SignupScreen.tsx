@@ -26,8 +26,8 @@ export const SignupScreen = () => {
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    mode: "onTouched",
-    reValidateMode: "onChange",
+    mode: "onSubmit",
+    reValidateMode: "onBlur",
     shouldUseNativeValidation: true,
     shouldFocusError: true,
   });
@@ -154,6 +154,7 @@ export const SignupScreen = () => {
                 <TextInput
                   placeholder="Enter a password"
                   secureTextEntry
+                  importantForAutofill="yes"
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -235,8 +236,19 @@ export const SignupScreen = () => {
           />
           <Text textAlign={"center"} mb={"l"}>
             By continuing, you agree to our{"\n"}
-            <Text color={"primary"}>Terms of Use</Text> and{" "}
-            <Text color={"primary"}>Privacy Policy</Text>
+            <Text
+              color={"primary"}
+              onPress={() => router.push("/terms_and_condition")}
+            >
+              Terms of Use
+            </Text>{" "}
+            and{" "}
+            <Text
+              color={"primary"}
+              onPress={() => router.push("/privacy_policy")}
+            >
+              Privacy Policy
+            </Text>
           </Text>
         </Box>
       </ScreenBox>

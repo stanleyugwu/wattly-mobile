@@ -9,12 +9,12 @@ import {
 import { QueryClientProvider } from "react-query";
 
 import { BaseToast } from "@/components/ui";
-import { queryClient } from "@/config/queryClient";
 import { AuthProvider } from "@/contexts/auth";
 import { OverlayLoaderProvider } from "@/contexts/overlay_loader";
 import { SettingsProvider } from "@/contexts/settings";
 import { OverlaySuccessProvider } from "@/contexts/success_overlay";
 import { useLoadAssets } from "@/hooks";
+import { queryClient } from "@/lib/api";
 import { AppThemeProvider } from "@/theme";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
@@ -67,6 +67,20 @@ function RootLayoutNav() {
                           <Stack.Screen
                             name="auth"
                             options={{ headerShown: false }}
+                          />
+                          <Stack.Screen
+                            name="privacy_policy"
+                            options={{
+                              headerTitle: "Privacy Policy",
+                              headerBackTitle: "Back",
+                            }}
+                          />
+                          <Stack.Screen
+                            name="terms_and_condition"
+                            options={{
+                              headerTitle: "Terms and Conditions",
+                              headerBackTitle: "Back",
+                            }}
                           />
                         </Stack>
                       </OverlayLoaderProvider>
