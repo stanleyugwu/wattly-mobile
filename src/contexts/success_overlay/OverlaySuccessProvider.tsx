@@ -1,9 +1,16 @@
-import React, { FC, PropsWithChildren, useRef, useState } from "react";
+import React, {
+  FC,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Portal } from "react-native-portalize";
 
 import { Box, SuccessView } from "@/components";
 import { createStyleHook } from "@/lib/utils";
 import { StatusBar } from "expo-status-bar";
+import { BackHandler } from "react-native";
 import { OverlaySuccessContext } from "./context";
 import { ShowOptions } from "./types";
 
@@ -49,6 +56,18 @@ export const OverlaySuccessProvider: FC<PropsWithChildren> = ({ children }) => {
     setTexts(initialState);
   };
 
+  useEffect(() => {
+    const handler = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (visible) {
+        hide();
+        return true;
+      }
+      return false;
+    });
+
+    return () => handler.remove();
+  }, []);
+
   return (
     <OverlaySuccessContext.Provider value={{ show, hide }}>
       {children}
@@ -61,16 +80,16 @@ export const OverlaySuccessProvider: FC<PropsWithChildren> = ({ children }) => {
               headingText={texts.heading}
               onCTAPress={ctaFunction.current || (() => {})}
             />
-            <StatusBar
-              backgroundColor={colors.surface}
-              translucent
-              hideTransitionAnimation="slide"
-              animated
-              style={isDarkMode ? "light" : "dark"}
-            />
           </Box>
         )}
       </Portal>
+      <StatusBar
+        backgroundColor={colors.surface}
+        translucent
+        hideTransitionAnimation="slide"
+        animated
+        style={isDarkMode ? "light" : "dark"}
+      />
     </OverlaySuccessContext.Provider>
   );
 };

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
 import { useMutation } from "react-query";
 
@@ -54,82 +53,80 @@ export const PasswordResetScreen = () => {
   });
 
   return (
-    <KeyboardAvoidingView behavior="height">
-      <ScreenBox>
-        <Image source={Images.logo} style={styles.logo} contentFit="contain" />
-        <Text
-          variant={"heading"}
-          style={{ fontSize: 32 }}
-          mt={"s"}
-          textAlign={"center"}
-        >
-          Create a new{"\n"}password
-        </Text>
-        <Box
-          borderWidth={2}
-          borderColor={"text"}
-          my={"s"}
-          width={30}
-          borderRadius={"round"}
-          alignSelf={"center"}
-        />
-        <Text variant={"body"} textAlign={"center"}>
-          All good! Now setup a new strong password for your account
-        </Text>
+    <ScreenBox inkeyboardView>
+      <Image source={Images.logo} style={styles.logo} contentFit="contain" />
+      <Text
+        variant={"heading"}
+        style={{ fontSize: 32 }}
+        mt={"s"}
+        textAlign={"center"}
+      >
+        Create a new{"\n"}password
+      </Text>
+      <Box
+        borderWidth={2}
+        borderColor={"text"}
+        my={"s"}
+        width={30}
+        borderRadius={"round"}
+        alignSelf={"center"}
+      />
+      <Text variant={"body"} textAlign={"center"}>
+        All good! Now setup a new strong password for your account
+      </Text>
 
-        <Box gap={"xxl"} pt={"xxl"}>
-          <Box gap={"xs"}>
-            <Text>New Password</Text>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  placeholder="Enter a new password"
-                  secureTextEntry
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  passwordRules={passwordRules}
-                  error={errors.password?.message}
-                  returnKeyLabel="Next"
-                  returnKeyType="next"
-                  enterKeyHint="next"
-                />
-              )}
-            />
-          </Box>
-
-          <Box gap={"xs"} mb={"xxl"}>
-            <Text>Confirm Password</Text>
-            <Controller
-              control={control}
-              name="confirmPassword"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  placeholder="Re-enter your password"
-                  secureTextEntry
-                  onChangeText={onChange}
-                  value={value}
-                  onBlur={onBlur}
-                  passwordRules={passwordRules}
-                  error={errors.confirmPassword?.message}
-                  submitBehavior="blurAndSubmit"
-                  returnKeyLabel="Done"
-                  returnKeyType="done"
-                  enterKeyHint="done"
-                />
-              )}
-            />
-          </Box>
-          <Button
-            label="Reset Password"
-            onPress={handleChangePassword}
-            loading={isResettingPassword}
+      <Box gap={"xxl"} pt={"xxl"}>
+        <Box gap={"xs"}>
+          <Text>New Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value, onBlur } }) => (
+              <TextInput
+                placeholder="Enter a new password"
+                secureTextEntry
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                passwordRules={passwordRules}
+                error={errors.password?.message}
+                returnKeyLabel="Next"
+                returnKeyType="next"
+                enterKeyHint="next"
+              />
+            )}
           />
         </Box>
-      </ScreenBox>
-    </KeyboardAvoidingView>
+
+        <Box gap={"xs"} mb={"xxl"}>
+          <Text>Confirm Password</Text>
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, value, onBlur } }) => (
+              <TextInput
+                placeholder="Re-enter your password"
+                secureTextEntry
+                onChangeText={onChange}
+                value={value}
+                onBlur={onBlur}
+                passwordRules={passwordRules}
+                error={errors.confirmPassword?.message}
+                submitBehavior="blurAndSubmit"
+                returnKeyLabel="Done"
+                returnKeyType="done"
+                enterKeyHint="done"
+              />
+            )}
+          />
+        </Box>
+        <Button
+          label="Reset Password"
+          onPress={handleChangePassword}
+          loading={isResettingPassword}
+        />
+      </Box>
+    </ScreenBox>
   );
 };
 

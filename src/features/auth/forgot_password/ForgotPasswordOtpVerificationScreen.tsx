@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { scale, ScaledSheet } from "react-native-size-matters";
 import { useMutation } from "react-query";
 
@@ -81,80 +81,78 @@ export const ForgotPasswordOtpVerificationScreen = () => {
   }, []);
 
   return (
-    <KeyboardAvoidingView behavior="padding">
-      <ScreenBox>
-        <Image source={Images.logo} style={styles.logo} contentFit="contain" />
-        <Text
-          variant={"heading"}
-          style={{ fontSize: 32 }}
-          mt={"s"}
-          textAlign={"center"}
-        >
-          Let's verify{"\n"}it's you!
-        </Text>
-        <Box
-          borderWidth={2}
-          borderColor={"text"}
-          my={"s"}
-          width={30}
-          borderRadius={"round"}
-          alignSelf={"center"}
+    <ScreenBox inkeyboardView inSafeArea={{ top: false }}>
+      <Image source={Images.logo} style={styles.logo} contentFit="contain" />
+      <Text
+        variant={"heading"}
+        style={{ fontSize: 32 }}
+        mt={"s"}
+        textAlign={"center"}
+      >
+        Let's verify{"\n"}it's you!
+      </Text>
+      <Box
+        borderWidth={2}
+        borderColor={"text"}
+        my={"s"}
+        width={30}
+        borderRadius={"round"}
+        alignSelf={"center"}
+      />
+      <Text variant={"body"} textAlign={"center"}>
+        A one-time pin (OTP) code has been sent to{" "}
+        <Text style={{ fontFamily: FontName.PrimaryBold }}>{email}</Text>.
+        Please enter the code below to verify your identity and continue with
+        password reset.
+      </Text>
+
+      <Box gap={"xxl"} pt={"xxl"} flex={1}>
+        <OTPField
+          isError={otpError}
+          cellCount={OTP_COUNT}
+          onChangeText={handleOtpInput}
         />
-        <Text variant={"body"} textAlign={"center"}>
-          A one-time pin (OTP) code has been sent to{" "}
-          <Text style={{ fontFamily: FontName.PrimaryBold }}>{email}</Text>.
-          Please enter the code below to verify your identity and continue with
-          password reset.
-        </Text>
-
-        <Box gap={"xxl"} pt={"xxl"} flex={1}>
-          <OTPField
-            isError={otpError}
-            cellCount={OTP_COUNT}
-            onChangeText={handleOtpInput}
-          />
-          {countdown === 0 ? (
-            !resendingOtp &&
-            !isVerifyingOtp && (
-              <Text
-                onPress={handleResendOtp}
-                textAlign={"center"}
-                textDecorationLine={"underline"}
-                variant={"body"}
-                color={"primary"}
-                style={{ fontFamily: FontName.PrimaryBold }}
-              >
-                Resend code
-              </Text>
-            )
-          ) : (
-            <Text textAlign={"center"}>
-              Resend code in{" "}
-              <Text style={{ fontFamily: FontName.PrimaryBold }}>
-                {countdown}
-              </Text>
+        {countdown === 0 ? (
+          !resendingOtp &&
+          !isVerifyingOtp && (
+            <Text
+              onPress={handleResendOtp}
+              textAlign={"center"}
+              textDecorationLine={"underline"}
+              variant={"body"}
+              color={"primary"}
+              style={{ fontFamily: FontName.PrimaryBold }}
+            >
+              Resend code
             </Text>
-          )}
+          )
+        ) : (
+          <Text textAlign={"center"}>
+            Resend code in{" "}
+            <Text style={{ fontFamily: FontName.PrimaryBold }}>
+              {countdown}
+            </Text>
+          </Text>
+        )}
 
-          {(isVerifyingOtp || resendingOtp) && (
-            <Box gap={"xs"} alignItems={"center"}>
-              <ActivityIndicator size={scale(25)} color={colors.primary} />
-              <Text variant={"small"}>
-                {isVerifyingOtp ? "Verifying OTP..." : "Resending OTP..."}
-              </Text>
-            </Box>
-          )}
+        {(isVerifyingOtp || resendingOtp) && (
+          <Box gap={"xs"} alignItems={"center"}>
+            <ActivityIndicator size={scale(25)} color={colors.primary} />
+            <Text variant={"small"}>
+              {isVerifyingOtp ? "Verifying OTP..." : "Resending OTP..."}
+            </Text>
+          </Box>
+        )}
 
-          <Button
-            label="Confirm"
-            disabled={!otp || otp.length !== OTP_COUNT || resendingOtp}
-            loading={isVerifyingOtp}
-            style={{ marginTop: 40 }}
-            onPress={() => handleVerifyOtp(otp)}
-          />
-        </Box>
-      </ScreenBox>
-    </KeyboardAvoidingView>
+        <Button
+          label="Confirm"
+          disabled={!otp || otp.length !== OTP_COUNT || resendingOtp}
+          loading={isVerifyingOtp}
+          style={{ marginTop: 40 }}
+          onPress={() => handleVerifyOtp(otp)}
+        />
+      </Box>
+    </ScreenBox>
   );
 };
 

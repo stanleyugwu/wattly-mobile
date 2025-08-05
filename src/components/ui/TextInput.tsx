@@ -21,32 +21,32 @@ export const TextInput: FC<TextInputProps> = ({
   secureTextEntry,
   ...rest
 }) => {
-  const [passwordVisible, setPasswordVisible] = useState(
-    secureTextEntry ? false : true
+  const [passwordHidden, setPasswordHidden] = useState(
+    secureTextEntry ? true : false
   );
   const { palette, isDarkMode, colors, textVariants } = useTheme();
   const Wrapper = error ? Box : Fragment;
 
   const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
+    setPasswordHidden(!passwordHidden);
   };
 
   return (
     <Wrapper>
       <BaseTextInput
         {...rest}
-        secureTextEntry={secureTextEntry ? passwordVisible : false}
+        secureTextEntry={secureTextEntry ? passwordHidden : false}
         placeholderTextColor={isDarkMode ? palette.gray700 : palette.gray300}
         style={[
           styles.textInput,
           {
             fontSize: textVariants.body.fontSize,
           },
-          style,
           {
             borderColor: error ? palette.red : palette.gray300,
             color: colors.text,
           },
+          style,
         ]}
       />
       {error ? (
@@ -61,7 +61,7 @@ export const TextInput: FC<TextInputProps> = ({
           hitSlop={{ left: 30, right: 30, bottom: 20, top: 20 }}
         >
           <Octicons
-            name={passwordVisible ? "eye" : "eye-closed"}
+            name={passwordHidden ? "eye" : "eye-closed"}
             color={colors.textMuted}
             size={scale(18)}
             adjustsFontSizeToFit

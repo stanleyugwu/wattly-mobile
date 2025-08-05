@@ -55,13 +55,19 @@ const BottomSheetComponent = forwardRef<BottomSheetRef, BottomSheetProps>(
 // We juyst add the type not the actual Ref property
 const BottomSheet = BottomSheetComponent as SheetInterface;
 
-const useStyles = createStyleHook(({ spacing, colors, borderRadii }) => ({
-  providerSheetStyle: {
-    padding: spacing.m,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadii.xl,
-    borderTopRightRadius: borderRadii.xl,
-  },
-}));
+const useStyles = createStyleHook(
+  ({ spacing, colors, isDarkMode, borderRadii }) => ({
+    providerSheetStyle: {
+      padding: spacing.m,
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: borderRadii.xl,
+      borderTopRightRadius: borderRadii.xl,
+      shadowColor: isDarkMode ? colors.white : colors.black,
+      shadowOffset: { height: 1, width: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 10,
+    },
+  })
+);
 
 export { BottomSheet };
