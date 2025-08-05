@@ -7,4 +7,5 @@ export interface AuthContextType {
   signIn: (user: User) => void;
   signOut: () => void;
   setTxPin: (pin: string) => void;
+  syncProfile: (profile: User["profile"]) => void;
 }

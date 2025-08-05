@@ -49,6 +49,20 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
     });
   };
 
+  const syncProfile = (profile: User["profile"]) => {
+    const newData: User = {
+      ...userData!,
+      profile: {
+        ...userData?.profile,
+        ...profile,
+      },
+    };
+    setUserData(newData);
+    storageService.setItem(STORE_KEYS.USER_DATA, newData).then((stored) => {
+      if (stored) logger.info("AuthProvider:: profile updated");
+    });
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       // storageService.removeItem(STORE_KEYS.USER_DATA);
@@ -75,6 +89,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
         signOut,
         setTxPin,
         isSignedIn: !!userData,
+        syncProfile,
       }}
     >
       {props.children}
