@@ -1,16 +1,17 @@
 import React, { type FC } from "react";
-import { scale, ScaledSheet, vs } from "react-native-size-matters";
+import { vs } from "react-native-size-matters";
 
-import { Box, NetworkError, ScreenBox, Text } from "@/components";
+import { Box, Image, NetworkError, ScreenBox, Text } from "@/components";
 import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
-import { useTheme } from "@/theme";
-import { AntDesign } from "@expo/vector-icons";
+import { PROFILE_PIC_BASE_URL } from "@/lib/constants";
+import { createStyleHook } from "@/lib/utils";
+import { Images } from "@assets/index";
 import { router } from "expo-router";
 import { Platform, Pressable, ScrollView } from "react-native";
-import { ElectricityTxSkeleton, useGetElectricityTxs } from "../electricity";
-import { useGetTransferHistory } from "../transfer";
-import { WalletTxSkeleton } from "../wallet";
+import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
+import { useGetTransferHistory } from "../../transfer";
+import { WalletTxSkeleton } from "../../wallet";
 import {
   CurvyIconButton,
   ElectricityTx,
@@ -26,13 +27,15 @@ interface DashboardScreenProps {}
  */
 export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
   const { user } = useAuth();
-  const { palette } = useTheme();
+  const { palette, styles } = useStyles();
 
   const electrictyTxs = useGetElectricityTxs();
   const walletTxs = useGetTransferHistory();
 
   const electricityData = electrictyTxs.data?.slice(0, 2) || [];
   const walletData = walletTxs.data?.slice(0, 5) || [];
+
+  const profilePicUrl = `${PROFILE_PIC_BASE_URL}/${user?.profile.profile}`;
 
   return (
     <ScreenBox rowGap={"xxl"}>
@@ -48,18 +51,18 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
         <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
           <NotificationIconBtn hasUnreadNotification={true} />
-          {/* TODO: add profile picture support */}
-          <Box
-            borderRadius={"round"}
-            padding={"xs"}
-            width={scale(45)}
-            height={scale(45)}
-            alignItems={"center"}
-            justifyContent={"center"}
-            style={{ backgroundColor: palette.blue100 }}
+
+          <Pressable
+            onPress={() => router.navigate("/(protected)/(tabs)/account")}
           >
-            <AntDesign name="user" size={scale(25)} color={palette.gray900} />
-          </Box>
+            <Image
+              source={profilePicUrl}
+              contentFit="contain"
+              placeholderContentFit="contain"
+              placeholder={Images.icon}
+              style={styles.profilePic}
+            />
+          </Pressable>
         </Box>
       </Box>
 
@@ -172,7 +175,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
 DashboardScreen.displayName = "DashboardScreen";
 
-const styles = ScaledSheet.create({
+const useStyles = createStyleHook(({ borderRadii, colors }) => ({
   btnScrollView: {
     flex: 1,
     position: "absolute",
@@ -181,4 +184,11 @@ const styles = ScaledSheet.create({
       ios: -10,
     }),
   },
-});
+  profilePic: {
+    width: "45@s",
+    height: "45@s",
+    borderRadius: borderRadii.round,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+}));
