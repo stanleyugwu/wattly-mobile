@@ -1,5 +1,5 @@
 import { TransferHistoryScreen } from "@/features/transfer";
 
-export default function HistoryScreenWrapper() {
+export default function HistoryScreenContainer() {
   return <TransferHistoryScreen />;
 }
