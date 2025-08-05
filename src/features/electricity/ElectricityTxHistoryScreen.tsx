@@ -25,7 +25,12 @@ interface ElectricityTxHistoryScreenProps {}
 export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
   props
 ) => {
-  const { data: txs, isLoading } = useGetElectricityTxs();
+  const {
+    data: txs,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useGetElectricityTxs();
   const { spacing, colors, insets } = useTheme();
 
   const sections = useMemo(
@@ -84,6 +89,8 @@ export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
     <Box p={{ phone: "m" }} style={{ paddingBottom: insets.bottom }}>
       <ElectricityTxSkeleton show={isLoading} count={5} />
       <SectionList
+        refreshing={isRefetching && !isLoading}
+        onRefresh={refetch}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderNoTxView}
         contentContainerStyle={{ rowGap: spacing.s }}

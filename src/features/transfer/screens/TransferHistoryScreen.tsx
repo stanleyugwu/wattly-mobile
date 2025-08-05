@@ -1,5 +1,5 @@
 import React, { useMemo, type FC } from "react";
-import { s, ScaledSheet } from "react-native-size-matters";
+import { s } from "react-native-size-matters";
 
 import { Box, Button, Text } from "@/components";
 import { groupAndSortRecords } from "@/lib/utils";
@@ -24,14 +24,16 @@ interface TransferHistoryScreenProps {}
 export const TransferHistoryScreen: FC<TransferHistoryScreenProps> = (
   props
 ) => {
-  const { data: transfers, isLoading } = useGetTransferHistory();
+  const txHistory = useGetTransferHistory();
   const { spacing, colors, insets } = useTheme();
 
   const sections = useMemo(
     () =>
-      groupAndSortRecords(transfers || [], (transfer) => transfer.updated_at) ||
-      [],
-    [transfers]
+      groupAndSortRecords(
+        txHistory.data || [],
+        (transfer) => transfer.updated_at
+      ) || [],
+    [txHistory.data]
   );
   sections.map((d) => d.data[0]);
   const renderTx: SectionListRenderItem<TransferTransaction> = ({
@@ -81,9 +83,11 @@ export const TransferHistoryScreen: FC<TransferHistoryScreenProps> = (
   };
 
   return (
-    <Box p={{ phone: "m" }} style={{ paddingBottom: insets.bottom }}>
-      <TransferTxSkeleton show={isLoading} count={8} />
+    <Box p={{ phone: "m" }} style={{ paddingBottom: insets.bottom, flex: 1 }}>
+      <TransferTxSkeleton show={txHistory.isLoading} count={8} />
       <SectionList
+        onRefresh={txHistory.refetch}
+        refreshing={txHistory.isRefetching && !txHistory.isLoading}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderNoTxView}
         contentContainerStyle={{ rowGap: spacing.s }}
@@ -97,5 +101,3 @@ export const TransferHistoryScreen: FC<TransferHistoryScreenProps> = (
 };
 
 TransferHistoryScreen.displayName = "TransferHistoryScreen";
-
-const styles = ScaledSheet.create({});

@@ -73,15 +73,22 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
 
   const topUpMutation = useElectricityTopupMutation();
 
-  const { control, handleSubmit, setValue, reset, getValues, setError } =
-    useForm<ElectricityTopupFormData>({
-      resolver: zodResolver(electricityTopupSchema),
-      mode: "onSubmit",
-      defaultValues: { meterType: "prepaid" },
-      reValidateMode: "onChange",
-      shouldUseNativeValidation: true,
-      shouldFocusError: true,
-    });
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    getValues,
+    setError,
+    clearErrors,
+  } = useForm<ElectricityTopupFormData>({
+    resolver: zodResolver(electricityTopupSchema),
+    mode: "onSubmit",
+    defaultValues: { meterType: "prepaid" },
+    reValidateMode: "onChange",
+    shouldUseNativeValidation: true,
+    shouldFocusError: true,
+  });
 
   const sheetProps = useMemo(
     () => ({
@@ -302,6 +309,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
         verifying: false,
         info: data,
       });
+      clearErrors("meterNumber");
     } catch (error) {
       setError("meterNumber", {
         message: "Meter not found. Invalid meter number",
