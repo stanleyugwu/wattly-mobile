@@ -19,7 +19,7 @@ import { useSuccessOverlay } from "@/contexts/success_overlay";
 import { queryClient, QueryKeys } from "@/lib/api";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, requestAppStoreReview } from "@/lib/utils";
 import { Images } from "@assets/index";
 import { transfer } from "../api";
 import { PinInputs } from "../components";
@@ -83,7 +83,7 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
           queryClient.invalidateQueries({
             queryKey: QueryKeys.getTransferTxs,
           });
-
+          requestAppStoreReview();
           router.dismissTo({
             pathname: "/(protected)/transfer/transfer_details/[reference]",
             // @ts-expect-error

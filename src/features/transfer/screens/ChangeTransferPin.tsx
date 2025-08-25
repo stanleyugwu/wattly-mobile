@@ -5,6 +5,7 @@ import { Box, Button, ScreenBox, Text, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
 import { useSuccessOverlay } from "@/contexts/success_overlay";
 import { Toast } from "@/lib/toast";
+import { requestAppStoreReview } from "@/lib/utils";
 import { createTransactionPin } from "@/services/api";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +52,7 @@ export const ChangeTransferPinScreen: FC<ChangeTransferPinScreenProps> = (
         ctaLabel: "Continue",
         onCTAPress: () => {
           successOverlay.hide();
+          requestAppStoreReview();
         },
       });
     } catch (error: any) {
