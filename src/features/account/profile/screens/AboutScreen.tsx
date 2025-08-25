@@ -1,9 +1,9 @@
+import Constants from "expo-constants";
 import React, { type FC } from "react";
 import { ScaledSheet } from "react-native-size-matters";
 
 import { Box, Image, ScreenBox, Text } from "@/components";
 import { Images } from "@assets/index";
-import config from "../../../../../app.json";
 
 interface AboutScreenProps {}
 
@@ -11,8 +11,8 @@ interface AboutScreenProps {}
  * Component for `About` screen
  */
 export const AboutScreen: FC<AboutScreenProps> = (props) => {
-  const version = config.expo.version;
-  const appName = config.expo.name;
+  const version = Constants.expoConfig?.version;
+  const appName = Constants.expoConfig?.name;
 
   return (
     <ScreenBox inSafeArea={{ top: false }} alignItems={"center"} rg={"l"}>
