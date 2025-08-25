@@ -1,7 +1,14 @@
 import React, { type FC } from "react";
 import { vs } from "react-native-size-matters";
 
-import { Box, Image, NetworkError, ScreenBox, Text } from "@/components";
+import {
+  Box,
+  EmptyDataView,
+  Image,
+  NetworkError,
+  ScreenBox,
+  Text,
+} from "@/components";
 import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
 import { PROFILE_PIC_BASE_URL } from "@/lib/constants";
@@ -156,18 +163,31 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
         </Box>
 
         {/* Loader */}
-        <WalletTxSkeleton show={walletTxs.isLoading} />
-        {walletTxs.isError ? (
+        {walletTxs.isLoading ? (
+          <WalletTxSkeleton show={true} />
+        ) : walletTxs.isError ? (
           <NetworkError
             body="Couldn't fetch recent wallet transactions. Try again"
             onRetry={walletTxs.refetch}
           />
-        ) : null}
-
-        {/* Render wallet transactions */}
-        {walletData.map((tx) => (
-          <WalletTx tx={tx} key={tx.id} />
-        ))}
+        ) : walletData.length === 0 ? (
+          <Box>
+            <EmptyDataView
+              body="No transactions yet"
+              title="You haven't performed any transactions yet"
+            />
+            <Text
+              onPress={() => router.navigate("/(protected)/electricity")}
+              color={"primary"}
+              fontFamily={"PrimaryBold"}
+              textAlign={"center"}
+            >
+              Top-up Electricity
+            </Text>
+          </Box>
+        ) : (
+          walletData.map((tx) => <WalletTx tx={tx} key={tx.id} />)
+        )}
       </Box>
     </ScreenBox>
   );
