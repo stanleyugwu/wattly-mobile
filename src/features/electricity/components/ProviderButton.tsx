@@ -1,11 +1,14 @@
 import { Box, Image, Text } from "@/components";
-import { createStyleHook } from "@/lib/utils";
+import {
+  createStyleHook,
+  getElectricityProviderLogoFromText,
+} from "@/lib/utils";
 import { FC, memo } from "react";
 import { Pressable } from "react-native";
 import { ElectricityProvider } from "../types";
 
-interface ProviderButtonProps {
-  onPress: VoidFunction;
+export interface ProviderButtonProps {
+  onPress: (selectedProvider: ElectricityProvider & { logo: string }) => void;
   provider: ElectricityProvider;
 }
 
@@ -15,15 +18,20 @@ interface ProviderButtonProps {
 export const ProviderButton: FC<ProviderButtonProps> = memo(
   ({ onPress, provider }) => {
     const { styles, palette } = useStyles();
+    const logo = getElectricityProviderLogoFromText(provider.name);
+
     return (
-      <Pressable style={styles.providerBtn} onPress={onPress}>
+      <Pressable
+        style={styles.providerBtn}
+        onPress={() => onPress({ ...provider, logo })}
+      >
         <Box
           p={"xxs"}
           borderWidth={1}
           borderRadius={"round"}
           style={{ borderColor: palette.gray300 }}
         >
-          <Image source={provider.logo} style={styles.providerLogo} />
+          <Image source={logo} style={styles.providerLogo} />
         </Box>
         <Text fontFamily={"PrimaryBold"} style={{ flex: 1, flexWrap: "wrap" }}>
           {provider.name}
@@ -36,7 +44,7 @@ export const ProviderButton: FC<ProviderButtonProps> = memo(
 const useStyles = createStyleHook(({ colors, spacing }) => ({
   providerBtn: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.background,
     paddingVertical: spacing.m,
     flexDirection: "row",
     alignItems: "center",

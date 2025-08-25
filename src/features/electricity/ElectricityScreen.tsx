@@ -1,9 +1,5 @@
 import { AntDesign, EvilIcons } from "@expo/vector-icons";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetFlatList,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useMemo, useRef, useState, type FC } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -16,28 +12,41 @@ import {
 } from "react-native";
 import { s, scale } from "react-native-size-matters";
 
-import { Box, ScreenBox, Text, TextInput } from "@/components";
+import {
+  BottomSheet,
+  BottomSheetRef,
+  Box,
+  ScreenBox,
+  Text,
+  TextInput,
+} from "@/components";
 import { useAuth } from "@/contexts/auth";
 import { useOverlayLoader } from "@/contexts/overlay_loader";
 import { queryClient, QueryKeys } from "@/lib/api";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
-import { createStyleHook, formatCurrency } from "@/lib/utils";
+import {
+  createStyleHook,
+  formatCurrency,
+  requestAppStoreReview,
+} from "@/lib/utils";
 import { FontName } from "@/theme";
 import { router } from "expo-router";
 import { getMeterInfo as fetchMeterInfo } from "./api";
 import {
   BeneficiaryButton,
-  ProviderButton,
   ProviderSelectButton,
+  ProviderSheet,
 } from "./components";
 import { CheckSelectButton } from "./components/CheckSelectButton";
-import { useElectricityTopupMutation, useSavedBeneficiaries } from "./hooks";
-import { PROVIDERS } from "./proivders";
+import {
+  useElectricityTopupMutation,
+  useGetElectricityProviders,
+  useSavedBeneficiaries,
+} from "./hooks";
 import { electricityTopupSchema } from "./schema";
 import { txDetailRef } from "./tx_detail_ref";
 import {
-  ElectricityProvider,
   ElectricityTopupFormData,
   IMeterInfo,
   SavedBeneficiary,
@@ -58,15 +67,17 @@ type MeterInfoState = { verifying: boolean; info: IMeterInfo | null };
  * Component for `Electricity` screen
  */
 export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
-  const providerSheetRef = useRef<BottomSheet>(null);
-  const beneficiariesSheetRef = useRef<BottomSheet>(null);
+  const providerSheetRef = useRef<BottomSheetRef>(null);
+  const beneficiariesSheetRef = useRef<BottomSheetRef>(null);
   const [meterInfo, setMeterInfo] = useState<MeterInfoState>({
     verifying: false,
     info: null,
   });
 
+  const providers = useGetElectricityProviders();
   const { beneficiaries, deleteBeneficiary, saveBeneficiary } =
     useSavedBeneficiaries();
+
   const { styles, colors, insets, palette, spacing, isDarkMode } = useStyles();
   const loader = useOverlayLoader();
   const { user } = useAuth();
@@ -92,45 +103,11 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
 
   const sheetProps = useMemo(
     () => ({
-      handleIndicatorStyle: { backgroundColor: colors.text },
-      backdropComponent: (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior="close"
-        />
-      ),
       ref: providerSheetRef,
-      snapPoints: ["50%"],
-      style: styles.providerSheetStyle,
+      snapPoints: ["50%", "70%"],
       index: -1,
-      backgroundStyle: { backgroundColor: colors.surface },
       enableDynamicSizing: false,
     }),
-    [colors, styles]
-  );
-
-  const renderProvider = useCallback<ListRenderItem<ElectricityProvider>>(
-    ({ item: provider }) => (
-      <ProviderButton
-        onPress={() => {
-          setValue(
-            "provider",
-            {
-              logo: provider.logo,
-              name: provider.name,
-              serviceId: provider.serviceId,
-            },
-            { shouldValidate: true }
-          );
-          setValue("meterNumber", "");
-          setMeterInfo({ info: null, verifying: false });
-          providerSheetRef.current?.close();
-        }}
-        provider={provider}
-      />
-    ),
     []
   );
 
@@ -210,6 +187,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
         data.response.customerAddress =
           customerInfo.Address || response.customerAddress;
       }
+      console.log(data);
 
       // Check known failure
       const successful = isElectricityTxSuccessful(data);
@@ -218,19 +196,20 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           // successfully recharged, pass tx to details screen for viewing and sharing
           loader.hide();
           Toast.success("Electricity top-up successful");
+          requestAppStoreReview();
           txDetailRef.details = data; // temp store tx details
           router.replace("/(protected)/electricity/tx_details");
-          queryClient.invalidateQueries({
-            queryKey: QueryKeys.getElectricityTxs,
-          });
         };
 
         // Prompt to save as beneficiary
-        const newBeneficiary = {
+        const newBeneficiary: Omit<SavedBeneficiary, "id"> = {
           meterName: meterInfo.info?.content.Customer_Name!,
           meterNo: formData.meterNumber,
           meterType: formData.meterType,
-          provider: formData.provider,
+          provider: {
+            name: formData.provider.name,
+            service_id: formData.provider.serviceId,
+          },
         };
 
         // check if a beneficiary exists with same data
@@ -274,6 +253,10 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
       logger.error(`ElectricityScreen:: Top-up failed: ${error}`);
       loader.hide();
       Toast.error(error.message, { visibilityTime: 10000 });
+    } finally {
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.getElectricityTxs,
+      });
     }
   });
 
@@ -602,23 +585,26 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           </Box>
         </ScreenBox>
       </KeyboardAvoidingView>
-      <BottomSheet {...sheetProps}>
-        <Text variant={"heading3"} my={"s"}>
-          Select Service Provider
-        </Text>
-        <BottomSheetFlatList
-          data={PROVIDERS}
-          contentContainerStyle={{ paddingBottom: insets.bottom }}
-          keyExtractor={(i) => i.name}
-          renderItem={renderProvider}
-        />
-      </BottomSheet>
-      <BottomSheet
+
+      <ProviderSheet
         {...sheetProps}
-        style={[sheetProps.style, { paddingHorizontal: 0 }]}
-        snapPoints={["50%", "80%"]}
-        ref={beneficiariesSheetRef}
-      >
+        query={providers}
+        onProviderSelect={(selected) => {
+          setValue(
+            "provider",
+            {
+              logo: selected.logo.toString(),
+              name: selected.name,
+              serviceId: selected.service_id,
+            },
+            { shouldValidate: true }
+          );
+          setValue("meterNumber", "");
+          setMeterInfo({ info: null, verifying: false });
+          providerSheetRef.current?.close();
+        }}
+      />
+      <BottomSheet {...sheetProps} ref={beneficiariesSheetRef}>
         <Text variant={"heading3"} m={"s"}>
           Beneficiaries
         </Text>
@@ -631,7 +617,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
             rowGap: spacing.m,
           }}
           keyExtractor={(i) =>
-            `${i.meterName}-${i.provider.serviceId}-${i.meterNo}`
+            `${i.meterName}-${i.provider.service_id}-${i.meterNo}`
           }
           renderItem={renderBeneficiary}
         />

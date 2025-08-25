@@ -1,5 +1,6 @@
 export const QueryKeys = {
   getElectricityTxs: ["get_electricity_txs"],
+  getElectricityProviders: ["get_electricity_providers"],
   getTransferTxs: ["get_transfer_txs"],
   verifyPasswordResetEmail: ["verify_password_reset_email"],
   verifyTransferPinResetOtp: ["verify_transfer_pin_reset_otp"],

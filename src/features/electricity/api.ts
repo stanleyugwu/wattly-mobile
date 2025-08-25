@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api";
 import { APIResponse } from "@/types";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
+  ElectricityProvider,
   ElectricityTopupReqPayload,
   GetMeterInfoReqPayload,
   IElectricityTopupResData,
@@ -14,6 +15,15 @@ export const getElectricityTxs = async (): Promise<IElectricityTx[]> => {
     "/electricities"
   );
   return res.data;
+};
+
+export const getElectricityProviders = async (): Promise<
+  ElectricityProvider[]
+> => {
+  const res = await apiClient.get<APIResponse<ElectricityProvider[]>>(
+    "/electricity-companies"
+  );
+  return res.data.data;
 };
 
 export const getMeterInfo = async (
@@ -32,7 +42,6 @@ export const topUpElectricity = async (
   data: ElectricityTopupReqPayload,
   config?: AxiosRequestConfig<ElectricityTopupReqPayload>
 ): Promise<IElectricityTopupResData> => {
-  console.log(data);
   const { data: res } = await apiClient.post<
     any,
     AxiosResponse<APIResponse<IElectricityTopupResData>>,
