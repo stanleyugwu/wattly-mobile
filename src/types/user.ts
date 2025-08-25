@@ -4,8 +4,8 @@ export interface User {
     name: string;
     email: string;
     phone: string;
-    refferel_link: string;
-    refferel: null;
+    refferel_link: string; // referral id
+    refferel: null; // referrer id
     email_verified_at: string;
     email_verification_otp: string;
     email_verification_attempts: string;
