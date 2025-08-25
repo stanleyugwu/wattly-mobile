@@ -71,7 +71,11 @@ export const ElectricityTxHistoryScreen: FC<ElectricityTxHistoryScreenProps> = (
   const renderNoTxView = () => {
     return (
       <Box variant={"surface"} rg={"xxs"} alignItems={"center"} py={"xxl"}>
-        <FontAwesome6 name="face-sad-tear" size={s(40)} />
+        <FontAwesome6
+          name="face-sad-tear"
+          color={colors.textMuted}
+          size={s(40)}
+        />
         <Text variant={"heading3"}>You haven't top-up yet!</Text>
         <Text textAlign={"center"} color={"textMuted"} mb={"xxl"}>
           We couldn't find any electricity transaction history. You haven't

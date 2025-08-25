@@ -68,8 +68,12 @@ export const TransferHistoryScreen: FC<TransferHistoryScreenProps> = (
   const renderNoTxView = () => {
     return (
       <Box variant={"surface"} rg={"xxs"} alignItems={"center"} py={"xxl"}>
-        <FontAwesome6 name="face-sad-tear" size={s(40)} />
-        <Text variant={"heading3"}>You haven't top-up yet!</Text>
+        <FontAwesome6
+          name="face-sad-tear"
+          size={s(40)}
+          color={colors.textMuted}
+        />
+        <Text variant={"heading3"}>You haven't transferred yet!</Text>
         <Text textAlign={"center"} color={"textMuted"} mb={"xxl"}>
           We couldn't find any transfer transaction. You haven't transferred
           funds to anyone yet!
@@ -87,7 +91,7 @@ export const TransferHistoryScreen: FC<TransferHistoryScreenProps> = (
       <TransferTxSkeleton show={txHistory.isLoading} count={8} />
       <SectionList
         onRefresh={txHistory.refetch}
-        refreshing={txHistory.isRefetching && !txHistory.isLoading}
+        refreshing={txHistory.isFetching && !txHistory.isLoading}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderNoTxView}
         contentContainerStyle={{ rowGap: spacing.s }}

@@ -91,16 +91,18 @@ export enum ElectricityProviders {
 export type MeterType = "prepaid" | "postpaid";
 
 export interface ElectricityProvider {
+  id: number;
+  service_id: string;
   name: string;
-  serviceId: string;
-  logo: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type ElectricityTopupFormData = z.infer<typeof electricityTopupSchema>;
 
 export interface SavedBeneficiary {
   id: string;
-  provider: ElectricityProvider;
+  provider: Pick<ElectricityProvider, "name" | "service_id">;
   meterNo: string;
   meterName: string;
   meterType: MeterType;
@@ -134,7 +136,7 @@ export interface IElectricityTopupResData extends IElectricityTx {}
 
 export type GetMeterInfoReqPayload = {
   billers_code: string;
-  service_id: ElectricityProvider["serviceId"];
+  service_id: ElectricityProvider["service_id"];
   type: MeterType;
 };
 
