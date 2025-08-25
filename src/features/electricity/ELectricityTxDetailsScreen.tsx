@@ -2,10 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
-import React, { useRef, type FC } from "react";
+import React, { useRef, useState, type FC } from "react";
 import { Pressable } from "react-native";
 import { s } from "react-native-size-matters";
-import ViewShot, { captureRef } from "react-native-view-shot";
+import ViewShot from "react-native-view-shot";
 
 import { Box, Button, Image, ScreenBox, Text, TextProps } from "@/components";
 import { logger } from "@/lib/logger";
@@ -15,6 +15,8 @@ import {
   formatCurrency,
   getElectricityProviderLogoFromText,
   getFirstValidValue,
+  shareReceiptAsImage,
+  shareReceiptAsPdf,
 } from "@/lib/utils";
 import { txDetailRef } from "./tx_detail_ref";
 import { isElectricityTxSuccessful } from "./utils";
@@ -58,8 +60,10 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   _
 ) => {
   const tx = txDetailRef.details; // set by preceeding screen
-  const { palette, styles, colors } = useStyles();
+  const { palette, styles, colors, borderRadii } = useStyles();
   const viewShotRef = useRef(null);
+  const [sharingAsImage, setSharingAsImage] = useState(false);
+  const [sharingAsPdf, setSharingAsPdf] = useState(false);
 
   // Ensure data is available
   if (!tx?.response) {
@@ -80,21 +84,21 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   };
 
   const handleShareAsImage = async () => {
-    const uri = await captureRef(viewShotRef, {
-      format: "png",
-      quality: 1,
-      width: 500,
-      height: 1000,
-    });
-    console.log("📸 Image saved at:", `file://${uri}`);
+    setSharingAsImage(true);
+    try {
+      await shareReceiptAsImage(viewShotRef, txId);
+    } finally {
+      setSharingAsImage(false);
+    }
   };
 
   const handleShareAsPdf = async () => {
-    const uri = await captureRef(viewShotRef, {
-      format: "png",
-      quality: 1,
-    });
-    console.log("📸 Image saved at:", `file://${uri}`);
+    setSharingAsPdf(true);
+    try {
+      await shareReceiptAsPdf(viewShotRef, txId);
+    } finally {
+      setSharingAsPdf(false);
+    }
   };
 
   // START: =====>>>>>>>> NORMALIZE TX FIELDS
@@ -112,6 +116,7 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
       ) || "0"
     ) || 0
   );
+
   const token =
     (tx.response.token || tx.response.purchased_code || "").match(/\d+/)?.[0] ??
     "";
@@ -136,9 +141,16 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
 
   return (
     <ScreenBox inSafeArea={{ top: false }}>
-      <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1 }}>
-        <Box rg={"l"}>
-          <Box variant={"surface"} alignItems={"center"} rg={"s"}>
+      <ViewShot
+        ref={viewShotRef}
+        style={{
+          backgroundColor: colors.surface,
+          borderRadius: borderRadii.m,
+        }}
+        options={{ format: "png", quality: 1 }}
+      >
+        <Box rg={"l"} borderRadius={"m"}>
+          <Box variant={"surface"} alignItems={"center"} rg={"s"} pt={"xl"}>
             <Box
               p="xxs"
               borderWidth={1}
@@ -179,28 +191,37 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
             </Box>
           </Box>
           {txSuccessful ? (
-            <Box variant={"surface"}>
+            <Box
+              variant={"surface"}
+              style={{ borderRadius: 0 }}
+              borderWidth={1}
+              borderRightWidth={0}
+              borderLeftWidth={0}
+              borderColor={"textMuted"}
+            >
               <Box flexDirection={"row"} cg={"xs"}>
                 <Text>Token:</Text>
                 <Text fontFamily={"SpaceMono"} letterSpacing={1}>
                   {token}
                 </Text>
-                <Pressable
-                  style={styles.copyBtn}
-                  hitSlop={{ left: 30, right: 20, top: 10, bottom: 10 }}
-                  onPress={handleCopyToken}
-                >
-                  <Ionicons
-                    name="copy-outline"
-                    size={s(18)}
-                    color={colors.primary}
-                  />
-                </Pressable>
+                {!sharingAsImage ? (
+                  <Pressable
+                    style={styles.copyBtn}
+                    hitSlop={{ left: 30, right: 20, top: 10, bottom: 10 }}
+                    onPress={handleCopyToken}
+                  >
+                    <Ionicons
+                      name="copy-outline"
+                      size={s(18)}
+                      color={colors.primary}
+                    />
+                  </Pressable>
+                ) : null}
               </Box>
             </Box>
           ) : null}
 
-          <Box variant={"surface"} rg={"s"}>
+          <Box variant={"surface"} rg={"s"} pb={"xl"}>
             <Text fontFamily={"PrimaryBold"}>Transaction Details</Text>
             <DetailText label={"Meter Number"} value={meterNo} />
             <DetailText label={"Customer Name"} value={customerName} />
@@ -219,8 +240,16 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
       </ViewShot>
 
       <Box flexDirection={"row"} alignSelf={"center"} mt={"l"} cg={"l"}>
-        <Button label="Share as PDF" onPress={handleShareAsPdf} />
-        <Button label="Share as Image" onPress={handleShareAsImage} />
+        <Button
+          label="Share as PDF"
+          onPress={handleShareAsPdf}
+          loading={sharingAsPdf}
+        />
+        <Button
+          label="Share as Image"
+          onPress={handleShareAsImage}
+          loading={sharingAsImage}
+        />
       </Box>
     </ScreenBox>
   );
