@@ -1,4 +1,5 @@
 export * from "./Button";
+export * from "./EmptyDataView";
 export * from "./Image";
 export * from "./NetworkError";
 export * from "./OTPField";
