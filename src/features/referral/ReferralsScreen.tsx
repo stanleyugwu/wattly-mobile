@@ -23,9 +23,9 @@ interface ReferralsScreenProps {}
  */
 export const ReferralsScreen: FC<ReferralsScreenProps> = (props) => {
   const { user } = useAuth();
-  const { colors, spacing, borderRadii } = useTheme();
+  const { colors, spacing } = useTheme();
   const referrals = useGetReferrals();
-  const { top, bottom } = useSafeAreaInsets();
+  const { top } = useSafeAreaInsets();
 
   const appName = Constants.expoConfig?.name;
 

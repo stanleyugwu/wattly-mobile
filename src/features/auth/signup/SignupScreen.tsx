@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
-import React from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { KeyboardAvoidingView } from "react-native";
 import { ScaledSheet } from "react-native-size-matters";
@@ -19,10 +19,13 @@ const passwordRules =
   "required: upper; required: lower; required: digit; max-consecutive: 2; minlength: 8;";
 
 export const SignupScreen = () => {
+  const { ref: referralCode } = useLocalSearchParams<{ ref: string }>();
+
   const {
     control,
     handleSubmit,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -53,6 +56,13 @@ export const SignupScreen = () => {
     console.log(data);
     mutate(data);
   });
+
+  useEffect(() => {
+    if (referralCode?.trim()) {
+      setValue("referralCode", referralCode.trim());
+      Toast.success("Referral code applied");
+    }
+  }, [referralCode]);
 
   return (
     <KeyboardAvoidingView behavior="height">
