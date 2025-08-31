@@ -13,7 +13,11 @@ export const signUpSchema = z
     confirmPassword: z
       .string()
       .min(8, "Password Must be at least 8 characters"),
-    referralCode: z.string().min(11, "Invalid referral code").optional(),
+    referralCode: z
+      .string()
+      .min(11, "Invalid referral code")
+      .max(11, "Invalid referral code")
+      .optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

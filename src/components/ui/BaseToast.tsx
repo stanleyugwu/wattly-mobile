@@ -1,12 +1,12 @@
-import { ViewStyle } from "react-native";
 import { FC } from "react";
+import { ViewStyle } from "react-native";
+import { scale, vs } from "react-native-size-matters";
 import Toast, {
   ErrorToast,
   InfoToast,
   SuccessToast,
   ToastProps,
 } from "react-native-toast-message";
-import { scale, vs } from "react-native-size-matters";
 
 import { useTheme } from "@/theme";
 import { ToastType } from "@/types";
@@ -15,7 +15,7 @@ const TOAST_HEIGHT = vs(15);
 const TOAST_FONT_SIZE = scale(11);
 
 export const BaseToast: FC<ToastProps> = () => {
-  const { colors } = useTheme();
+  const { colors, insets } = useTheme();
 
   const text1Style = { color: colors.textMuted };
   const text2Style = { color: colors.textMuted, fontSize: TOAST_FONT_SIZE };
@@ -24,6 +24,7 @@ export const BaseToast: FC<ToastProps> = () => {
     height: "auto",
     paddingVertical: TOAST_HEIGHT,
     flexWrap: "wrap",
+    marginBottom: insets.bottom / 2,
   };
 
   return (

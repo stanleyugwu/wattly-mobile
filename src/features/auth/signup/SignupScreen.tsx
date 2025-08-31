@@ -53,7 +53,6 @@ export const SignupScreen = () => {
   });
 
   const handleSignup = handleSubmit((data) => {
-    console.log(data);
     mutate(data);
   });
 
