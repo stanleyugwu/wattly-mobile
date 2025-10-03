@@ -31,7 +31,9 @@ export const updateProfile = async ({
     any,
     AxiosResponse<APIResponse<User["profile"]>>,
     FormData
-  >("/profile", formData);
+  >("/profile", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 
   return res.data.data;
 };

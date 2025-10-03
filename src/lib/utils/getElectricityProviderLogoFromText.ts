@@ -7,6 +7,11 @@ const providerToLogo = {
   [Provider.EKEDC]: RemoteImages.ekedc,
   [Provider.IBEDC]: RemoteImages.ibedc,
   [Provider.IKEDC]: RemoteImages.ikedc,
+  [Provider.JED]: RemoteImages.jedc,
+  [Provider.KAEDCO]: RemoteImages.kaedco,
+  [Provider.KEDCO]: RemoteImages.kedco,
+  [Provider.PHED]: RemoteImages.phed,
+  [Provider.BEDC]: RemoteImages.bedc,
 };
 
 /**
@@ -15,7 +20,6 @@ const providerToLogo = {
  */
 export const getElectricityProviderLogoFromText = (searchTxt: string) => {
   // TODO: find more efficient way to fetch provider logo
-
   // E.g product name: "Ikeja Electric Payment - IKEDC"
   const providerName = searchTxt || "";
 

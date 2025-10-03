@@ -19,4 +19,11 @@ export const RemoteImages = {
     "https://res.cloudinary.com/devvie/image/upload/v1750372792/d0a53bc0-a2a0-4e5d-ab2e-d30d4e9d52cb.png",
   ikedc:
     "https://res.cloudinary.com/devvie/image/upload/v1750372570/feddb8dd-c9bf-46b7-9f01-a1c778cf293b.png",
+  jedc: "https://res.cloudinary.com/devvie/image/upload/v1757770861/e4436c97-b5e2-44dc-af37-deafc691c610.png",
+  kaedco:
+    "https://res.cloudinary.com/devvie/image/upload/v1757771196/05439140-00a5-4767-baa4-60545c3d4cb4.png",
+  kedco:
+    "https://res.cloudinary.com/devvie/image/upload/v1757771354/71ab403b-2db7-427c-9413-a039ccdecfdc.png",
+  phed: "https://res.cloudinary.com/devvie/image/upload/v1757771508/c51ca738-66d3-473e-a74e-3be5b141eb2f.png",
+  bedc: "https://res.cloudinary.com/devvie/image/upload/v1757771653/718802b9-5922-4045-9217-dccf8162e4d6.png",
 };

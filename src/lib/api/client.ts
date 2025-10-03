@@ -8,7 +8,7 @@ import { logger } from "../logger";
 
 const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
-  timeout: 10000,
+  timeout: 20000,
   timeoutErrorMessage: "Your request took too long, please try again",
   headers: {
     "Content-Type": "application/json",
