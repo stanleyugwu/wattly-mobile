@@ -13,7 +13,7 @@ export async function requestAppStoreReview() {
   // 2. Ask for review
   try {
     await StoreReview.requestReview();
-  } catch (e) {
-    logger.error("Error requesting review:");
+  } catch (error) {
+    logger.error("Error requesting review:", { error });
   }
 }

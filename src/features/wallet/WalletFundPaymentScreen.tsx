@@ -44,7 +44,9 @@ export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = () => {
         text1: "Verification Failed",
         text2: "Payment verification failed",
       });
-      logger.error("WalletFundPaymentScreen:: Verification failed", { err });
+      logger.error("WalletFundPaymentScreen:: Verification failed", {
+        error: err,
+      });
     } finally {
       loader.hide();
       router.dismissTo("/");

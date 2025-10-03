@@ -50,20 +50,22 @@ export const TransferConfirmationScreen: FC<TransferConfirmationScreenProps> = (
     loader.show("Processing, please wait...");
     setPin("");
 
+    const payload = {
+      account_number: accountNumber as string,
+      amount: amount as string,
+      description: desc as string,
+      transaction_pin: pin,
+    };
     try {
-      const res = await transfer({
-        account_number: accountNumber as string,
-        amount: amount as string,
-        description: desc as string,
-        transaction_pin: pin,
-      });
+      const res = await transfer(payload);
 
       // handle faulty transaction
       const newBalance = (+user?.profile.balance! || 0) - (+amount || 0);
       if (newBalance < 0) {
         signOut();
         logger.error(
-          "User performed successfull transaction with insufficient wallet balance"
+          "User performed successful transaction with insufficient wallet balance",
+          { userId: user?.profile.id, newBalance, payload, response: res }
         );
       }
 

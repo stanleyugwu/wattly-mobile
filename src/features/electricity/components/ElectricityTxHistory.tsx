@@ -25,9 +25,9 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
   const { styles, palette } = useStyles();
 
   if (!tx?.response) {
-    logger.error(
-      `ElectricityTxHistory:: Invalid transaction from backend:${tx}`
-    );
+    logger.error(`ElectricityTxHistory:: Invalid transaction from backend`, {
+      tx,
+    });
     return null;
   }
 

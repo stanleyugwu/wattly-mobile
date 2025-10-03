@@ -43,7 +43,7 @@ export const ReferralsScreen: FC<ReferralsScreenProps> = (props) => {
         logger.debug(`User dismissed share product link modal`);
       }
     } catch (error) {
-      logger.error("Error while sharing product link");
+      logger.error("Error while sharing product link", { error });
     }
   };
 
@@ -54,7 +54,7 @@ export const ReferralsScreen: FC<ReferralsScreenProps> = (props) => {
       });
       Toast.success("Referral link copied");
     } catch (error) {
-      logger.error("ReferralsScreen:: Failed to copy referral link");
+      logger.error("ReferralsScreen:: Failed to copy referral link", { error });
     }
   };
 

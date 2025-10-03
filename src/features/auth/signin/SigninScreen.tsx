@@ -69,7 +69,10 @@ export const SigninScreen = () => {
             .finally(() => setSendingOtp(false));
         }
       } else {
-        logger.warn(`SignInScreen:: Sign in failed: ${data}`);
+        logger.error(
+          `SignInScreen:: Sign in successful but incorrect data returned from BE`,
+          { data }
+        );
         Toast.error("Sign in failed, please try again");
       }
     },

@@ -29,8 +29,8 @@ export const shareReceiptAsImage = async (
     await FileSystem.copyAsync({ from: uri, to: fileUri });
 
     await Sharing.shareAsync(fileUri);
-  } catch (err: any) {
-    logger.error("handleShareAsImage failed");
+  } catch (error: any) {
+    logger.error("Tx receipt image sharing failed", { error });
     Toast.error("Failed to share receipt image");
   }
 };
@@ -64,8 +64,8 @@ export const shareReceiptAsPdf = async (
     `;
     const { uri: pdfUri } = await Print.printToFileAsync({ html });
     await Sharing.shareAsync(pdfUri);
-  } catch (err) {
-    logger.error("handleShareAsPdf failed");
+  } catch (error) {
+    logger.error("Tx receipt PDF sharing failed", { error });
     Toast.error("Failed to share receipt PDF");
   }
 };

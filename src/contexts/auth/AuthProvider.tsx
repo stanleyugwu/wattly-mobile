@@ -20,7 +20,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
     setUserData(user);
     authTokenRef.current = user.token;
     storageService.setItem(STORE_KEYS.USER_DATA, user).then((stored) => {
-      if (stored) logger.info("AuthProvider:: persisted user data");
+      if (stored) logger.debug("AuthProvider:: persisted user data");
     });
     router.replace("/");
   };
@@ -59,7 +59,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
     };
     setUserData(newData);
     storageService.setItem(STORE_KEYS.USER_DATA, newData).then((stored) => {
-      if (stored) logger.info("AuthProvider:: profile updated");
+      if (stored) logger.debug("AuthProvider:: profile updated");
     });
   };
 
@@ -72,9 +72,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
 
       setUserData(userData || null);
       setIsLoading(false);
-      logger.info(
-        `AuthProvider:: User data loaded: ${JSON.stringify(userData)}`
-      );
+      logger.debug(`AuthProvider:: User data loaded`, userData);
     };
 
     fetchUserData();

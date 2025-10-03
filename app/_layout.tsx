@@ -15,11 +15,33 @@ import { SettingsProvider } from "@/contexts/settings";
 import { OverlaySuccessProvider } from "@/contexts/success_overlay";
 import { useLoadAssets } from "@/hooks";
 import { queryClient } from "@/lib/api";
+import { globalErrorHandler } from "@/lib/utils";
 import { AppThemeProvider } from "@/theme";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import * as Sentry from "@sentry/react-native";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { Host as PortalizeHost } from "react-native-portalize";
+
+Sentry.init({
+  dsn: "https://8b5579f8b501ca50930e23ea75e8a21d@o4509767713423360.ingest.us.sentry.io/4510126670544896",
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  // @ts-ignore
+  enableLogs: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 // add support for extended date formatting
 dayjs.extend(advancedFormat);
@@ -28,6 +50,9 @@ export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
+
+// Global error handler
+ErrorUtils.setGlobalHandler(globalErrorHandler);
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -38,14 +63,14 @@ export const unstable_settings = {
 // The SplashScreen will be hidden after loading auth data in AuthProvider.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const { loaded } = useLoadAssets();
   if (!loaded) {
     return null;
   }
 
   return <RootLayoutNav />;
-}
+});
 
 function RootLayoutNav() {
   return (

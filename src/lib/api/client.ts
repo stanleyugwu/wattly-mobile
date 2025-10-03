@@ -53,7 +53,9 @@ axiosInstance.interceptors.response.use(
       !error.config?.url?.includes("/sign_in")
     ) {
       // Handle unauthorized access, e.g., redirect to login
-      logger.info("Unauthorized access - redirecting to login");
+      logger.info("API client reponse interceptor, unauthorized access", {
+        error,
+      });
       router.dismissTo("/auth/signin");
       storageService.removeItem(STORE_KEYS.USER_DATA);
     }

@@ -65,7 +65,7 @@ export const TransferPinOtpScreen = () => {
         Toast.success(`New OTP Sent to ${email}`);
       })
       .catch((error) => {
-        logger.error(`TransferPinOtp:: OTP Not Resent: ${error}`);
+        logger.error(`TransferPinOtp:: OTP Not Resent`, { error });
         Toast.error("OTP not resent, Please try again");
       })
       .finally(() => {

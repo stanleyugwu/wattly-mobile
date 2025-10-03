@@ -8,7 +8,7 @@ class StorageService {
   static secureStoreAvailable = true;
 
   constructor() {
-    logger.info("StorageService:: Initializing storage service");
+    logger.debug("StorageService:: Initializing storage service");
     SecureStore.isAvailableAsync()
       .then((isAvailable) => {
         if (!isAvailable) {
@@ -20,7 +20,8 @@ class StorageService {
       })
       .catch((error) => {
         logger.error(
-          `StorageService:: Error checking SecureStore availability: ${error}`
+          `StorageService:: Error checking SecureStore availability`,
+          { error }
         );
       });
   }
@@ -61,7 +62,8 @@ class StorageService {
       logger.error(
         `${
           this.secureStoreKeys[key] ? "Secure" : "Async"
-        }Storage:: Failed to get item with key:${key} from storage: ${error}`
+        }Storage:: Failed to get item with key:${key} from storage`,
+        { error }
       );
       // If an error occurs, return null to indicate failure.
       return null;
@@ -95,7 +97,8 @@ class StorageService {
       logger.error(
         `${
           options?.secure ? "Secure" : "Async"
-        }Storage:: Failed to set item in storage: ${error}`
+        }Storage:: Failed to set item in storage`,
+        { error }
       );
       // If an error occurs, return false to indicate failure.
       return false;
@@ -122,7 +125,8 @@ class StorageService {
       logger.warn(
         `${
           this.secureStoreKeys[key] ? "Secure" : "Async"
-        }Storage:: Failed to remove item from storage: ${error}`
+        }Storage:: Failed to remove item from storage`,
+        { error }
       );
       return false;
     }
@@ -133,7 +137,7 @@ class StorageService {
    * This will remove all items, so use with caution.
    */
   async clear(): Promise<boolean> {
-    logger.info("Storage:: Clearing all items from storage");
+    logger.debug("Storage:: Clearing all items from storage");
     try {
       // Clear secure storage first
       Object.keys(this.secureStoreKeys).forEach(async (key) => {
@@ -147,7 +151,7 @@ class StorageService {
       await this.storage.clear();
       return true;
     } catch (error) {
-      logger.error(`Storage:: Failed to clear storage: ${error}`);
+      logger.warn(`Storage:: Failed to clear storage`, { error });
       return false;
     }
   }

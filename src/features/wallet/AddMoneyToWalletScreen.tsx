@@ -32,7 +32,7 @@ const DetailBox: FC<DetailBoxProps> = ({ detail }) => {
       });
       Toast.success("Copied");
     } catch (error) {
-      logger.error("AddMoneyToWalletScreen:: Failed to copy text");
+      logger.error("AddMoneyToWalletScreen:: Failed to copy text", { error });
     }
   };
 
@@ -86,7 +86,9 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
         amountSheetRef.current?.close();
       } else throw new Error("Failed to get payment reference");
     } catch (error: any) {
-      logger.error(error.message);
+      logger.error(error.message || "Failed to get payment reference", {
+        error,
+      });
       Toast.error(error.message, { position: "top" });
     } finally {
       setLoading(false);

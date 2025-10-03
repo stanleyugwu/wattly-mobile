@@ -79,7 +79,9 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
       });
       Toast.success("Token copied");
     } catch (error) {
-      logger.error("ElectricityTxDetailsScreen:: Failed to copy token");
+      logger.error("ElectricityTxDetailsScreen:: Failed to copy token", {
+        error,
+      });
     }
     Toast.success("Token copied");
   };

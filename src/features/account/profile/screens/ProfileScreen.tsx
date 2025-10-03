@@ -3,7 +3,6 @@ import { s } from "react-native-size-matters";
 
 import { Box, Image, ScreenBox, Text } from "@/components";
 import { useAuth } from "@/contexts/auth";
-import { PROFILE_PIC_BASE_URL } from "@/lib/constants";
 import { createStyleHook } from "@/lib/utils";
 import { useTheme } from "@/theme";
 import { Images } from "@assets/index";
@@ -59,7 +58,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = (props) => {
     ]);
   };
 
-  const profilePicUrl = `${PROFILE_PIC_BASE_URL}/${user?.profile.profile}`;
+  const profilePicUrl = `${user?.profile.profile_url}`;
 
   return (
     <ScreenBox rg={"xxl"}>

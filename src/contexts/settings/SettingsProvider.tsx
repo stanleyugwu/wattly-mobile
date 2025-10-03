@@ -1,12 +1,12 @@
-import { useColorScheme } from "react-native";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { useColorScheme } from "react-native";
 
-import { SettingsContext } from "./context";
-import { AppColorScheme, Settings } from "./types";
-import { storageService } from "@/services";
 import { STORE_KEYS } from "@/constants";
 import { logger } from "@/lib/logger";
+import { storageService } from "@/services";
+import { SettingsContext } from "./context";
+import { AppColorScheme, Settings } from "./types";
 
 /**
  * App-wide settings context provider
@@ -29,7 +29,7 @@ export const SettingsProvider = (props: PropsWithChildren<{}>) => {
     storageService.setItem(STORE_KEYS.SETTINGS, payload).then((saved) => {
       if (saved) {
         persistedThemeMode.current = newTheme;
-        logger.info("Settings: settings updated and saved");
+        logger.debug("Settings: settings updated and saved");
       }
     });
     setSettings(payload);
@@ -58,7 +58,7 @@ export const SettingsProvider = (props: PropsWithChildren<{}>) => {
           STORE_KEYS.SETTINGS
         );
 
-        logger.info(`Settings:: Settings loaded: ${settings}`);
+        logger.debug(`Settings:: Settings loaded`, settings);
 
         if (settings) {
           persistedThemeMode.current = settings.themeMode;
@@ -68,7 +68,7 @@ export const SettingsProvider = (props: PropsWithChildren<{}>) => {
       } finally {
         setLoading(false);
         SplashScreen.hideAsync().catch((error) => {
-          logger.error(`SplashScreen:: Error hiding splash screen: ${error}`);
+          logger.error(`SplashScreen:: Error hiding splash screen`, { error });
         });
       }
     };

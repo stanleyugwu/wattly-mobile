@@ -59,9 +59,9 @@ export const ForgotPasswordOtpVerificationScreen = () => {
         Toast.success(`New OTP Sent to ${email}`);
       })
       .catch((error) => {
-        logger.error(
-          `ForgotPasswordOtpVerification:: OTP Not Resent: ${error}`
-        );
+        logger.error(`ForgotPasswordOtpVerification:: OTP Not Resent`, {
+          error,
+        });
         Toast.error("OTP not resent, Please try again");
       })
       .finally(() => {
