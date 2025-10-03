@@ -55,7 +55,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for qr code transfer and profile picture upload",
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": false
         }
@@ -76,6 +76,9 @@
       "policy": "appVersion"
     },
     "updates": {
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/2a64b0ea-4351-4c23-aa11-c3e4567ccf71"
     }
   }
