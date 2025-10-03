@@ -28,14 +28,13 @@ export const ForgotPasswordOtpVerificationScreen = () => {
     mutationFn: verifyPasswordResetEmail,
     mutationKey: QueryKeys.verifyPasswordResetEmail,
     onSuccess(data) {
-      console.log(data);
       router.navigate({
         pathname: "/auth/password/reset/[email]",
         params: { email },
       });
     },
     onError(error: any) {
-      console.log(error);
+      logger.error("Failed to send password reset email", { error });
       setOtpError(true);
       Toast.error(error.message);
     },

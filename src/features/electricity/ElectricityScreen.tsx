@@ -168,7 +168,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
 
     // all good, let's attempt recharge
     try {
-      loader.show("Recharging...Please wait");
+      loader.show("Topping up...Please wait");
       const data = await topUpElectricity({
         amount: formData.amount,
         billers_code: formData.meterNumber,
@@ -335,7 +335,6 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
       );
       throw Error("Top-up failed, please try again");
     } catch (error: any) {
-      console.log(error.message);
       logger.error(`ElectricityScreen:: Top-up api request threw`, { error });
       loader.hide();
       Toast.error(error.message);

@@ -33,11 +33,10 @@ export const PasswordResetScreen = () => {
     mutationFn: resetPassword,
     mutationKey: QueryKeys.resetPassword,
     onSuccess(data) {
-      console.log(data);
       router.dismissTo("/auth/password/reset/reset_successful");
     },
     onError(error: any) {
-      console.log(error);
+      logger.error("Password reset failed", { error });
       Toast.error(error.message);
     },
   });

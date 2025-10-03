@@ -8,6 +8,7 @@ import { s } from "react-native-size-matters";
 
 import { Box, Button, Image, ScreenBox, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
+import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { createStyleHook } from "@/lib/utils";
 import { Images } from "@assets/index";
@@ -64,10 +65,10 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = (props) => {
         phone: data.phone,
         profilePic: uploadedPic,
       });
-      Toast.success("Profile updated successfulyy");
+      Toast.success("Profile updated successfully");
       syncProfile(profile);
     } catch (error: any) {
-      console.log(error.response);
+      logger.error("Failed to update profile", { error });
       Toast.error("Failed to update profile, please try again");
     } finally {
       setUpdating(false);

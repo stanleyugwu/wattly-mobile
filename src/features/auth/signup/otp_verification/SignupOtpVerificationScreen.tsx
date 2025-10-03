@@ -30,11 +30,10 @@ export const SignupOtpVerificationScreen = () => {
     mutationFn: verifySignupEmail,
     mutationKey: QueryKeys.verifySignupEmail,
     onSuccess(data) {
-      console.log(data);
       router.dismissTo("/auth/signup/otp_verified");
     },
     onError(error: any) {
-      console.log(error);
+      logger.error("Failed to verify signup otp", { error });
       setOtpError(true);
       Toast.error(error.message);
     },
@@ -45,7 +44,6 @@ export const SignupOtpVerificationScreen = () => {
   };
 
   const handleOtpInput = useCallback((_otp: string) => {
-    console.log(_otp);
     setOtpError(false);
     setOtp(_otp);
     // auto verify upon complete entry

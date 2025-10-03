@@ -29,7 +29,6 @@ export const verifyWalletFunding = async (
   reference: string,
   paymentProvider: PaymentProvider
 ) => {
-  console.log(paymentProvider);
   const flutterwave = "/flutterwave/callback";
   const paystack = "/paystack/callback";
   const res = await apiClient.get<APIResponse<WalletFundingVerificationRes>>(
@@ -40,6 +39,5 @@ export const verifyWalletFunding = async (
       },
     }
   );
-  console.log("VERIFY", res.data);
   return res.data.data;
 };

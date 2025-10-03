@@ -80,7 +80,6 @@ export const verifyTransferPinResetOtp = async ({
   email,
   otp,
 }: Pick<ResetPinReqPayload, "email" | "otp">): Promise<null> => {
-  console.log(email, otp);
   const res = await apiClient.post<
     any,
     AxiosResponse<APIResponse<null>>,

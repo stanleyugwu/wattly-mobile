@@ -21,7 +21,6 @@ export const useTxStatusPolling = (
     const poll = async () => {
       try {
         const newTx = await getTxStatus(tx.request_id);
-        console.log("NEW STATUS:", newTx);
 
         if (!isTxPending(newTx)) {
           setTx((prev) => ({

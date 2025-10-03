@@ -8,6 +8,7 @@ import { useMutation } from "react-query";
 
 import { Box, Button, Image, ScreenBox, Text, TextInput } from "@/components";
 import { QueryKeys } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { FontName } from "@/theme";
 import { Images } from "@assets/index";
@@ -39,11 +40,10 @@ export const SignupScreen = () => {
     mutationFn: signUp,
     mutationKey: QueryKeys.signUp,
     onError(error: any) {
-      console.log(error);
+      logger.error("Failed to sign up", { error });
       Toast.error(error.message);
     },
     onSuccess(data) {
-      console.log(data);
       const email = getValues("email");
       router.replace({
         pathname: "/auth/signup/otp_verification/[email]",
