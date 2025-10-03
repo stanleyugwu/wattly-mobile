@@ -26,8 +26,8 @@ export const SigninScreen = () => {
     formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    mode: "onTouched",
-    reValidateMode: "onChange",
+    mode: "onSubmit",
+    reValidateMode: "onBlur",
   });
 
   const { isLoading: isSigningIn, mutate } = useMutation({
@@ -132,6 +132,8 @@ export const SigninScreen = () => {
                 onChangeText={onChange}
                 value={value}
                 secureTextEntry
+                returnKeyLabel="Sign In"
+                onSubmitEditing={handleSignIn}
                 autoCapitalize={"none"}
                 placeholder="Enter your password"
                 error={errors.password?.message}

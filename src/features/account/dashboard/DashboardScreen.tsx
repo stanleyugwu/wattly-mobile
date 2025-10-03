@@ -11,7 +11,6 @@ import {
 } from "@/components";
 import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
-import { PROFILE_PIC_BASE_URL } from "@/lib/constants";
 import { createStyleHook } from "@/lib/utils";
 import { Images } from "@assets/index";
 import { router } from "expo-router";
@@ -19,13 +18,7 @@ import { Platform, Pressable, ScrollView } from "react-native";
 import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
 import { useGetTransferHistory } from "../../transfer";
 import { WalletTxSkeleton } from "../../wallet";
-import {
-  CurvyIconButton,
-  ElectricityTx,
-  NotificationIconBtn,
-  Wallet,
-  WalletTx,
-} from "./components";
+import { CurvyIconButton, ElectricityTx, Wallet, WalletTx } from "./components";
 
 interface DashboardScreenProps {}
 
@@ -42,8 +35,6 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
   const electricityData = electrictyTxs.data?.slice(0, 2) || [];
   const walletData = walletTxs.data?.slice(0, 5) || [];
 
-  const profilePicUrl = `${PROFILE_PIC_BASE_URL}/${user?.profile.profile}`;
-
   return (
     <ScreenBox rowGap={"xxl"}>
       <Box
@@ -57,13 +48,11 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
         </Box>
 
         <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
-          <NotificationIconBtn hasUnreadNotification={true} />
-
           <Pressable
             onPress={() => router.navigate("/(protected)/(tabs)/account")}
           >
             <Image
-              source={profilePicUrl}
+              source={user?.profile?.profile_url}
               contentFit="contain"
               placeholderContentFit="contain"
               placeholder={Images.icon}
@@ -149,7 +138,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           flexDirection={"row"}
         >
           <Text variant={"body"} fontFamily={"PrimaryBold"}>
-            Recent Transactions
+            Recent Transfers
           </Text>
           <Text
             variant={"small"}
@@ -171,20 +160,10 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
             onRetry={walletTxs.refetch}
           />
         ) : walletData.length === 0 ? (
-          <Box>
-            <EmptyDataView
-              body="No transactions yet"
-              title="You haven't performed any transactions yet"
-            />
-            <Text
-              onPress={() => router.navigate("/(protected)/electricity")}
-              color={"primary"}
-              fontFamily={"PrimaryBold"}
-              textAlign={"center"}
-            >
-              Top-up Electricity
-            </Text>
-          </Box>
+          <EmptyDataView
+            body="No transfers yet"
+            title="You haven't performed any transfers yet"
+          />
         ) : (
           walletData.map((tx) => <WalletTx tx={tx} key={tx.id} />)
         )}

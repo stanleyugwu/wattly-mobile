@@ -8,7 +8,6 @@ import { s } from "react-native-size-matters";
 
 import { Box, Button, Image, ScreenBox, TextInput } from "@/components";
 import { useAuth } from "@/contexts/auth";
-import { PROFILE_PIC_BASE_URL } from "@/lib/constants";
 import { Toast } from "@/lib/toast";
 import { createStyleHook } from "@/lib/utils";
 import { Images } from "@assets/index";
@@ -67,15 +66,13 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = (props) => {
       });
       Toast.success("Profile updated successfulyy");
       syncProfile(profile);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(error.response);
       Toast.error("Failed to update profile, please try again");
     } finally {
       setUpdating(false);
     }
   });
-
-  const userProfilePic = `${PROFILE_PIC_BASE_URL}/${user?.profile.profile}`;
 
   return (
     <ScreenBox rg={"xxl"}>
@@ -84,7 +81,7 @@ export const EditProfileScreen: FC<EditProfileScreenProps> = (props) => {
         style={styles.profileImgContainer}
       >
         <Image
-          source={uploadedPic?.uri || userProfilePic}
+          source={uploadedPic?.uri || user?.profile?.profile_url}
           contentFit="contain"
           placeholderContentFit="contain"
           placeholder={Images.icon}
