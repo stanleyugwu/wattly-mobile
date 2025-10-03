@@ -84,7 +84,6 @@ export const OverlaySuccessProvider: FC<PropsWithChildren> = ({ children }) => {
         )}
       </Portal>
       <StatusBar
-        backgroundColor={colors.surface}
         translucent
         hideTransitionAnimation="slide"
         animated

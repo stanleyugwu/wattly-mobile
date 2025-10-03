@@ -1,6 +1,8 @@
+export type PaymentProvider = "flutterwave" | "paystack";
 export type PaymentRef = {
   payment_url: string;
   reference: string;
+  provider: PaymentProvider;
 };
 
 export type WalletFundingVerificationRes = {

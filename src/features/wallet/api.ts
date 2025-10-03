@@ -1,23 +1,45 @@
 import { apiClient } from "@/lib/api";
 import { APIResponse } from "@/types";
 import { AxiosResponse } from "axios";
-import { PaymentRef, WalletFundingVerificationRes } from "./types";
+import {
+  PaymentProvider,
+  PaymentRef,
+  WalletFundingVerificationRes,
+} from "./types";
 
-export const getPaymentRef = async (amount: string): Promise<PaymentRef> => {
+export const getPaymentRef = async (
+  amount: string,
+  paymentProvider: PaymentProvider
+): Promise<PaymentRef> => {
+  const flutterwave = "/flutterwave/initiate";
+  const paystack = "/add-money";
+
   const res = await apiClient.post<
     any,
     AxiosResponse<PaymentRef>,
     { amount: string }
-  >("/add-money", {
+  >(paymentProvider === "flutterwave" ? flutterwave : paystack, {
     amount,
   });
 
   return res.data;
 };
 
-export const verifyWalletFunding = async (reference: string) => {
+export const verifyWalletFunding = async (
+  reference: string,
+  paymentProvider: PaymentProvider
+) => {
+  console.log(paymentProvider);
+  const flutterwave = "/flutterwave/callback";
+  const paystack = "/paystack/callback";
   const res = await apiClient.get<APIResponse<WalletFundingVerificationRes>>(
-    `/paystack/callback?reference=${reference}`
+    paymentProvider === "flutterwave" ? flutterwave : paystack,
+    {
+      params: {
+        reference,
+      },
+    }
   );
+  console.log("VERIFY", res.data);
   return res.data.data;
 };

@@ -3,33 +3,29 @@ import React, { useState, type FC } from "react";
 import { Box } from "@/components";
 import { WEBSITE } from "@/constants";
 import { useAuth } from "@/contexts/auth";
+import { useOverlayLoader } from "@/contexts/overlay_loader";
 import { logger } from "@/lib/logger";
 import { Toast } from "@/lib/toast";
 import { getProfile } from "@/services/api";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet } from "react-native";
 import WebView from "react-native-webview";
 import { verifyWalletFunding } from "./api";
 import { PaymentRef } from "./types";
 
 interface WalletFundPaymentScreenProps {}
 
-/**
- * Component for `WalletFundPayment` screen
- */
-export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = (
-  props
-) => {
-  const { payment_url, reference } = useLocalSearchParams() as PaymentRef;
-
+export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = () => {
+  const { payment_url, reference, provider } =
+    useLocalSearchParams() as PaymentRef;
   const { syncProfile } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [hasVerified, setHasVerified] = useState(false); // prevent multiple verifications
+  const [hasVerified, setHasVerified] = useState(false);
+  const loader = useOverlayLoader();
 
-  // invalid or missing payment url
-  if (!payment_url || !reference) {
+  if (!payment_url || !reference || !provider) {
     logger.error(
-      "WalletFundPaymentScreen:: Invalid or missing `payment_url` or `reference` parameter passed to screen"
+      "WalletFundPaymentScreen:: Invalid or missing params (payment_url, reference, provider)"
     );
     router.back();
     return null;
@@ -37,24 +33,33 @@ export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = (
 
   const verifyPayment = async () => {
     try {
-      await verifyWalletFunding(reference);
+      loader.show("Verifying Payment...");
+      await verifyWalletFunding(reference, provider);
       Toast.success("Wallet funding successful");
       const profile = await getProfile();
       syncProfile(profile);
-    } catch (err) {
-      Toast.error("Something went wrong verifying your payment");
-      logger.error("WalletFundPaymentScreen:: Wallet funding payment failed");
+    } catch (err: any) {
+      console.log(err.response);
+      Toast.error("Something went wrong verifying your payment", {
+        text1: "Verification Failed",
+        text2: "Payment verification failed",
+      });
+      logger.error("WalletFundPaymentScreen:: Verification failed", { err });
     } finally {
+      loader.hide();
       router.dismissTo("/");
     }
   };
 
   const handleNavChange = (navState: any) => {
     const { url } = navState;
+    // fallback: redirect back to WEBSITE
     if (!hasVerified && url.startsWith(WEBSITE)) {
       setHasVerified(true);
       verifyPayment();
+      return false;
     }
+    return true;
   };
 
   return (
@@ -65,8 +70,89 @@ export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = (
       <WebView
         source={{ uri: payment_url }}
         onLoadEnd={() => setLoading(false)}
-        onNavigationStateChange={handleNavChange}
+        onHttpError={(error) =>
+          logger.error("Payment Webview error", { error })
+        }
+        onShouldStartLoadWithRequest={handleNavChange}
         startInLoadingState
+        onMessage={(event) => {
+          const raw = event.nativeEvent.data;
+          // sometimes providers send JSON; be defensive
+          let msg = raw;
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.type) msg = parsed.type;
+          } catch {
+            // not JSON — keep raw
+          }
+
+          if (!msg || hasVerified) return;
+
+          if (msg === "payment-success") {
+            setHasVerified(true);
+            verifyPayment();
+          } else if (msg === "payment-cancelled") {
+            Alert.alert("Cancelled", "⚠️ Payment was cancelled.", [
+              { text: "OK", onPress: () => router.back() },
+            ]);
+          }
+        }}
+        injectedJavaScript={`
+  (function() {
+    function sendMessage(msg) {
+      window.ReactNativeWebView && window.ReactNativeWebView.postMessage(msg);
+    }
+
+    // ---- Success detection (Paystack) ----
+    const observer = new MutationObserver(() => {
+      const successEl = document.querySelector('h2.success__title');
+      if (successEl && successEl.innerText.includes("Payment Successful")) {
+        sendMessage("payment-success-tag");
+        observer.disconnect();
+      }
+
+      // ---- Paystack Cancel Button ----
+      const paystackCancelSpan = document.querySelector('div.checkout__footer.mobile-only button span.text');
+      if (paystackCancelSpan && paystackCancelSpan.innerText.includes("Cancel Payment")) {
+        const btn = paystackCancelSpan.closest("button");
+        if (btn && !btn.dataset.bound) {
+          btn.dataset.bound = "true";
+          btn.addEventListener("click", function () {
+            sendMessage("payment-cancelled");
+            observer.disconnect();
+          });
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // ---- Flutterwave Cancel (hook into onclose) ----
+    const originalOpen = window.open;
+    window.open = function() {
+      const popup = originalOpen.apply(this, arguments);
+      try {
+        if (popup && popup.flutterwaveCheckout) {
+          const orig = popup.flutterwaveCheckout;
+          popup.flutterwaveCheckout = function(config) {
+            const newConfig = {
+              ...config,
+              onclose: function() {
+                sendMessage("payment-cancelled");
+                if (config.onclose) config.onclose();
+              }
+            };
+            return orig(newConfig);
+          };
+        }
+      } catch (e) {
+        // fallback if injection fails
+      }
+      return popup;
+    };
+  })();
+  true;
+`}
       />
     </Box>
   );

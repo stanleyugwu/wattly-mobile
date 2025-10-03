@@ -18,6 +18,7 @@ import { useTheme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getPaymentRef } from "./api";
+import { PaymentProvider } from "./types";
 
 interface DetailBoxProps {
   detail: string;
@@ -58,34 +59,35 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
   const [loading, setLoading] = useState(false);
   const amountSheetRef = useRef<BottomSheetRef>(null);
   const [amount, setAmount] = useState("");
+  const selectedProvider = useRef<PaymentProvider>("paystack");
 
-  const BANK_NAME = "Providus Bank";
-  const ACCOUNT_NUMBER = "0561435285";
-  const ACCOUNT_NAME = "Wattly Wallet Top-up";
+  const BANK_NAME = "--";
+  const ACCOUNT_NUMBER = "--";
+  const ACCOUNT_NAME = "--";
 
   const amtInsufficient =
     !parseFloat(amount) || +amount < 100 || +amount > 1000000;
 
-  const handleFlutterwaveTopUp = async () => {
+  const handleTopUp = async () => {
     try {
       setLoading(true);
       Keyboard.dismiss();
 
-      const ref = await getPaymentRef(amount);
+      const ref = await getPaymentRef(amount, selectedProvider.current);
       if (ref?.payment_url && ref?.reference) {
-        amountSheetRef.current?.close();
-
         router.navigate({
           pathname: "/(protected)/wallet/add_money/[payment_url]",
           params: {
             payment_url: ref.payment_url,
             reference: ref.reference,
+            provider: selectedProvider.current,
           },
         });
+        amountSheetRef.current?.close();
       } else throw new Error("Failed to get payment reference");
     } catch (error: any) {
       logger.error(error.message);
-      Toast.error(error.message);
+      Toast.error(error.message, { position: "top" });
     } finally {
       setLoading(false);
     }
@@ -116,8 +118,18 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
         </Text>
 
         <Button
+          label="Top up with Paystack"
+          onPress={() => {
+            selectedProvider.current = "paystack";
+            amountSheetRef.current?.expand();
+          }}
+        />
+        <Button
           label="Top up with Flutterwave"
-          onPress={() => amountSheetRef.current?.expand()}
+          onPress={() => {
+            selectedProvider.current = "flutterwave";
+            amountSheetRef.current?.expand();
+          }}
         />
       </ScreenBox>
 
@@ -144,7 +156,7 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
             <Button
               label="Continue"
               disabled={amtInsufficient}
-              onPress={handleFlutterwaveTopUp}
+              onPress={handleTopUp}
               loading={loading}
             />
           </Box>
