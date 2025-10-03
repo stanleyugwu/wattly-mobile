@@ -12,7 +12,7 @@ import { FC } from "react";
 import { Pressable } from "react-native";
 import { txDetailRef } from "../tx_detail_ref";
 import { IElectricityTx } from "../types";
-import { isElectricityTxSuccessful } from "../utils";
+import { isTxSuccessful } from "../utils";
 
 interface ElectricityTxHistoryProps {
   tx: IElectricityTx;
@@ -30,9 +30,6 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
     );
     return null;
   }
-  if (!tx.response?.content?.transactions?.product_name) {
-    console.log(tx);
-  }
 
   const providerName = tx.response.content?.transactions?.product_name || "";
   const providerLogo = getElectricityProviderLogoFromText(providerName);
@@ -49,7 +46,7 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
     dayjs(
       getFirstValidValue(tx.response.transaction_date, tx.updated_at)
     ).format("Do MMMM YYYY h:mm A") || "N/A";
-  const txSuccessful = isElectricityTxSuccessful(tx);
+  const txSuccessful = isTxSuccessful(tx);
 
   const viewTx = () => {
     txDetailRef.details = tx;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { electricityTopupSchema } from "./schema";
 
+export type ElectricityTxStatus = "pending" | "initiated" | "delivered";
 export interface IElectricityTx {
   id: number;
   user_id: string;
@@ -16,7 +17,7 @@ export interface IElectricityTx {
     content: {
       errors?: string;
       transactions: {
-        status: string;
+        status: ElectricityTxStatus;
         product_name: string;
         unique_element: string;
         unit_price: string;
@@ -86,6 +87,11 @@ export enum ElectricityProviders {
   IBEDC = "IBEDC",
   EKEDC = "EKEDC",
   IKEDC = "IKEDC",
+  BEDC = "BEDC",
+  KEDCO = "KEDCO",
+  PHED = "PHED",
+  JED = "JED",
+  KAEDCO = "KAEDCO",
 }
 
 export type MeterType = "prepaid" | "postpaid";

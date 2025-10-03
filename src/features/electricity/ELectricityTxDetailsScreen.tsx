@@ -18,8 +18,9 @@ import {
   shareReceiptAsImage,
   shareReceiptAsPdf,
 } from "@/lib/utils";
+import { useTxStatusPolling } from "./hooks";
 import { txDetailRef } from "./tx_detail_ref";
-import { isElectricityTxSuccessful } from "./utils";
+import { isTxPending, isTxSuccessful } from "./utils";
 
 interface DetailTextProps extends TextProps {
   label: string;
@@ -59,7 +60,7 @@ interface ElectricityTxDetailsScreenProps {}
 export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   _
 ) => {
-  const tx = txDetailRef.details; // set by preceeding screen
+  const [tx, setTx] = useState(txDetailRef.details); // set by preceeding screen
   const { palette, styles, colors, borderRadii } = useStyles();
   const viewShotRef = useRef(null);
   const [sharingAsImage, setSharingAsImage] = useState(false);
@@ -123,21 +124,29 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   const meterNo =
     getFirstValidValue(tx.billers_code, tx.response.meterNumber) || "";
   const meterType = tx.variation_code;
+  const units = tx.response.units;
+
+  // these values are pre-populated by preceeding parent
   const customerName = tx.response.customerName;
   const customerAddress = tx.response.customerAddress;
-  const units = tx.response.units;
 
   //TODO: which tx id should show
   const txId = getFirstValidValue(
-    tx.response.content?.transactions?.transactionId,
     tx.request_id,
+    tx.response.content?.transactions?.transactionId,
     tx.response.requestId
   );
   const txDate =
     dayjs(
       getFirstValidValue(tx.response.transaction_date, tx.updated_at)
     ).format("Do MMMM YYYY h:mm A") || "N/A";
-  const txSuccessful = isElectricityTxSuccessful(tx);
+
+  const txPending = isTxPending(tx);
+  const txSuccessful = isTxSuccessful(tx);
+  const txReversed = tx.response.code === "040";
+
+  // polls status of pending tx
+  useTxStatusPolling(tx, setTx);
 
   return (
     <ScreenBox inSafeArea={{ top: false }}>
@@ -178,6 +187,10 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
               style={{
                 backgroundColor: txSuccessful
                   ? palette.green200
+                  : txPending
+                  ? palette.orange
+                  : txReversed
+                  ? palette.gray05
                   : palette.red100,
               }}
             >
@@ -186,11 +199,17 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
                 textAlign={"center"}
                 fontFamily={"PrimaryBold"}
               >
-                {txSuccessful ? "Successful" : "Failed"}
+                {txSuccessful
+                  ? "Successful"
+                  : txPending
+                  ? "Processing"
+                  : txReversed
+                  ? "Reversed"
+                  : "Failed"}
               </Text>
             </Box>
           </Box>
-          {txSuccessful ? (
+          {txSuccessful && token ? (
             <Box
               variant={"surface"}
               style={{ borderRadius: 0 }}
@@ -232,7 +251,9 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
             />
             <DetailText label={"Customer Address"} value={customerAddress} />
             <DetailText label={"Amount Paid"} value={amount} />
-            <DetailText label={"Units Purchased"} value={units} />
+            {units ? (
+              <DetailText label={"Units Purchased"} value={units} />
+            ) : null}
             <DetailText label={"Transaction No."} value={txId} />
             <DetailText label={"Transaction Date"} value={txDate} />
           </Box>

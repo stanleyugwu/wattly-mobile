@@ -32,18 +32,14 @@ import {
 } from "@/lib/utils";
 import { FontName } from "@/theme";
 import { router } from "expo-router";
-import { getMeterInfo as fetchMeterInfo } from "./api";
+import { getMeterInfo as fetchMeterInfo, topUpElectricity } from "./api";
 import {
   BeneficiaryButton,
   ProviderSelectButton,
   ProviderSheet,
 } from "./components";
 import { CheckSelectButton } from "./components/CheckSelectButton";
-import {
-  useElectricityTopupMutation,
-  useGetElectricityProviders,
-  useSavedBeneficiaries,
-} from "./hooks";
+import { useGetElectricityProviders, useSavedBeneficiaries } from "./hooks";
 import { electricityTopupSchema } from "./schema";
 import { txDetailRef } from "./tx_detail_ref";
 import {
@@ -51,7 +47,14 @@ import {
   IMeterInfo,
   SavedBeneficiary,
 } from "./types";
-import { isElectricityTxSuccessful } from "./utils";
+import {
+  balanceSufficient,
+  isServiceError,
+  isSeverError,
+  isTxPending,
+  isTxSuccessful,
+  isValidationError,
+} from "./utils";
 
 // TODO: create custom bottom sheet component that overlays screen headers and use here
 let meterInfoRequestController = new AbortController();
@@ -80,9 +83,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
 
   const { styles, colors, insets, palette, spacing, isDarkMode } = useStyles();
   const loader = useOverlayLoader();
-  const { user } = useAuth();
-
-  const topUpMutation = useElectricityTopupMutation();
+  const { user, syncProfile } = useAuth();
 
   const {
     control,
@@ -147,37 +148,43 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
     );
   }, []);
 
+  const deductBalance = (amount: string) => {
+    // @ts-expect-error
+    syncProfile({
+      balance: (+(user?.profile.balance || "0") - +(amount || "0")).toString(),
+    });
+  };
+
   const handleSubmitForm = handleSubmit(async (formData) => {
     // ensure meter details are verified before allowing recharge
     if (!meterInfo.info) return getMeterInfo(formData.meterNumber);
 
     // check wallet balance before allowing recharge
-    const balance = parseFloat(user?.profile?.balance || "0");
-    const topUpAmt = parseFloat(formData.amount || "0");
-    if (!balance || !topUpAmt || balance < topUpAmt) {
+    const balSufficient = balanceSufficient(user, formData.amount);
+    if (!balSufficient)
       return Toast.error(
         "Insufficient balance for transaction. Please top-up your wallet to continue"
       );
-    }
 
     // all good, let's attempt recharge
     try {
       loader.show("Recharging...Please wait");
-      const data = await topUpMutation.mutateAsync({
-        amount: topUpAmt.toString(),
+      const data = await topUpElectricity({
+        amount: formData.amount,
         billers_code: formData.meterNumber,
         phone: formData.phone || "",
         service_id: formData.provider.serviceId,
         variation_code: formData.meterType,
       });
 
-      // Check invalid response or failure
-      if (!data || !data.response)
-        throw Error("Top up failed", {
-          cause: "Missing response data attributes",
-        });
+      /**
+       * Check that tx is not empty
+       */
+      if (!data.response?.code) throw Error("Top-up failed, please try again");
 
-      // populate data with customer info cus it's not returned from BE
+      /**
+       * populate data with customer info cus it's not returned from BE
+       */
       // TODO: find a better approach to fetching customer info
       const customerInfo = meterInfo.info?.content;
       const response = data.response;
@@ -187,17 +194,31 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
         data.response.customerAddress =
           customerInfo.Address || response.customerAddress;
       }
-      console.log(data);
 
-      // Check known failure
-      const successful = isElectricityTxSuccessful(data);
-      if (successful) {
+      // Check success
+      const isSuccess = isTxSuccessful(data);
+      if (isSuccess) {
+        deductBalance(formData.amount);
         const completeTopup = () => {
           // successfully recharged, pass tx to details screen for viewing and sharing
           loader.hide();
           Toast.success("Electricity top-up successful");
           requestAppStoreReview();
           txDetailRef.details = data; // temp store tx details
+          // txDetailRef.details = {
+          //   ...data,
+          //   response: {
+          //     ...data.response,
+          //     content: {
+          //       ...data.response.content,
+          //       transactions: {
+          //         ...data.response.content.transactions,
+          //         status: "pending",
+          //       },
+          //     },
+          //   },
+          // }; // temp store tx details
+
           router.replace("/(protected)/electricity/tx_details");
         };
 
@@ -220,7 +241,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
             JSON.stringify(rest) === JSON.stringify(newBeneficiary)
         );
 
-        if (!beneficiaryExists)
+        if (!beneficiaryExists) {
           Alert.alert(
             "Save Beneficiary?",
             "Do you want to save this beneficiary for easier top-up on your next recharge?",
@@ -243,16 +264,81 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               },
             ]
           );
-        else completeTopup();
-      } else {
-        throw Error(
-          `Top-up failed.\n${data.response.response_description}\n${data.response.content?.errors}`
-        );
+        } else {
+          completeTopup();
+        }
+        return;
       }
+
+      /**
+       * check pending. For pending tx, we still redirect to tx screen
+       * and show pending status and intervally requery tx status while they're on that screen.
+       * Token would be sent to their number if tx fulfils
+       * then when they revisit the transaction from their tx history
+       * we requery the tx status from service provider.
+       */
+      const isPending = isTxPending(data);
+      if (isPending) {
+        deductBalance(formData.amount);
+        loader.hide();
+        Toast.success("Electricity top-up initiated");
+        txDetailRef.details = data; // temp store tx details
+        router.replace("/(protected)/electricity/tx_details");
+        return;
+      }
+
+      /**
+       * Check that tx failed due to third party service provider or biller error
+       */
+      const is3rdPartyError = isServiceError(data);
+      if (is3rdPartyError) {
+        loader.hide();
+        Toast.error(
+          "This service is unavailable at the moment, please try again in a bit"
+        );
+        return;
+      }
+
+      /**
+       * Check that tx failed due to our server error or validation error
+       * in which case we keep a log of it
+       */
+      const isServerOrValidationError =
+        isSeverError(data) || isValidationError(data);
+      if (isServerOrValidationError) {
+        loader.hide();
+        Toast.error(
+          "Something went wrong on our end, please check back in a bit"
+        );
+        logger.error(
+          "ElectrictyScreen::Top-up failed due to server or validation error",
+          { data }
+        );
+        return;
+      }
+
+      const isDuplicateError = data.response?.code === "019";
+      if (isDuplicateError) {
+        loader.hide();
+        Toast.error(
+          "Likely a duplicate transaction. You tried to top-up same meter multiple times in a short time",
+          { visibilityTime: 10000 }
+        );
+        return;
+      }
+
+      logger.error(
+        "ElectricityScreen:: Transaction failed or status wasn't detected",
+        {
+          data,
+        }
+      );
+      throw Error("Top-up failed, please try again");
     } catch (error: any) {
-      logger.error(`ElectricityScreen:: Top-up failed: ${error}`);
+      console.log(error.message);
+      logger.error(`ElectricityScreen:: Top-up api request threw`, { error });
       loader.hide();
-      Toast.error(error.message, { visibilityTime: 10000 });
+      Toast.error(error.message);
     } finally {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.getElectricityTxs,
@@ -281,17 +367,34 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
         { signal: meterInfoRequestController.signal }
       );
 
+      // log for invalid product i.e service-id
+      if (data.code === "012") {
+        logger.error(
+          "ElectricityScreen::Invalid serviceId used for validation",
+          { data }
+        );
+        throw Error("An error occured, please try again");
+      }
+
       if (
+        data.code != "000" ||
         data.content?.WrongBillersCode ||
-        data.content?.error ||
         !data.content?.Customer_Name
       )
         throw Error("Meter verification failed");
+
+      // Auto switch to correct meter type based on meter info
+      const apiMeterType = data.content?.Meter_Type;
+      setValue(
+        "meterType",
+        apiMeterType === "PREPAID" ? "prepaid" : "postpaid"
+      );
 
       setMeterInfo({
         verifying: false,
         info: data,
       });
+
       clearErrors("meterNumber");
     } catch (error) {
       setError("meterNumber", {
@@ -325,12 +428,12 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
                 alignItems={"center"}
                 justifyContent={"center"}
               >
-                <Text variant={"caption"} fontFamily={"PrimaryBold"}>
+                <Text variant={"caption"} fontFamily={"PrimaryBold"} pt={"xxs"}>
                   History
                 </Text>
                 <EvilIcons
                   name="chevron-right"
-                  size={scale(24)}
+                  size={scale(20)}
                   color={colors.text}
                 />
               </Box>

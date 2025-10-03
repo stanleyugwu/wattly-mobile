@@ -2,7 +2,10 @@ import { FC } from "react";
 import { Pressable } from "react-native";
 
 import { Box, Image, Text } from "@/components";
-import { createStyleHook } from "@/lib/utils";
+import {
+  createStyleHook,
+  getElectricityProviderLogoFromText,
+} from "@/lib/utils";
 import { EvilIcons } from "@expo/vector-icons";
 import { s } from "react-native-size-matters";
 import { SavedBeneficiary } from "../types";
@@ -22,7 +25,6 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
   beneficiary,
 }) => {
   const { palette, styles } = useStyles();
-
   return (
     <Pressable onPress={onSelect}>
       <Box
@@ -41,11 +43,13 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
           style={{ borderColor: palette.gray300 }}
         >
           <Image
-            source={beneficiary.provider.logo}
+            source={getElectricityProviderLogoFromText(
+              beneficiary.provider.name
+            )}
             style={styles.providerLogo}
           />
         </Box>
-        <Box flex={0.9} flexDirection={"column"}>
+        <Box flex={0.8} flexDirection={"column"}>
           <Text
             fontFamily={"PrimaryBold"}
             variant={"small"}
@@ -55,15 +59,15 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
           >
             {beneficiary.provider.name}
           </Text>
-          <Box flexDirection={"row"} alignItems={"center"} cg={"xs"} flex={1}>
-            <Text variant={"small"} textTransform={"uppercase"}>
+          <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
+            <Text variant={"caption"} textTransform={"uppercase"}>
               {beneficiary.meterName}
             </Text>
 
-            <Text variant={"small"} textTransform={"uppercase"}>
+            <Text variant={"caption"} textTransform={"uppercase"}>
               {beneficiary.meterNo}
             </Text>
-            <Text variant={"small"} textTransform={"uppercase"}>
+            <Text variant={"caption"} textTransform={"uppercase"}>
               {beneficiary.meterType}
             </Text>
           </Box>

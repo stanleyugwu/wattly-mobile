@@ -12,7 +12,7 @@ import {
 
 export const getElectricityTxs = async (): Promise<IElectricityTx[]> => {
   const { data: res } = await apiClient.get<APIResponse<IElectricityTx[]>>(
-    "/electricities"
+    "/my-electricity"
   );
   return res.data;
 };
@@ -42,10 +42,20 @@ export const topUpElectricity = async (
   data: ElectricityTopupReqPayload,
   config?: AxiosRequestConfig<ElectricityTopupReqPayload>
 ): Promise<IElectricityTopupResData> => {
+  console.log(data);
   const { data: res } = await apiClient.post<
     any,
     AxiosResponse<APIResponse<IElectricityTopupResData>>,
     ElectricityTopupReqPayload
   >("/electricity_pay", data, config);
+  return res.data;
+};
+
+export const getTxStatus = async (requestId: string) => {
+  const { data: res } = await apiClient.post<
+    any,
+    AxiosResponse<APIResponse<IElectricityTx>>,
+    { request_id: string }
+  >("/requery", { request_id: requestId });
   return res.data;
 };
