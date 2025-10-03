@@ -28,6 +28,7 @@ import { Toast } from "@/lib/toast";
 import {
   createStyleHook,
   formatCurrency,
+  getElectricityProviderLogoFromText,
   requestAppStoreReview,
 } from "@/lib/utils";
 import { FontName } from "@/theme";
@@ -121,11 +122,16 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           deleteBeneficiary(beneficiary.id);
         }}
         onSelect={() => {
+          const name = beneficiary.provider.name;
           reset(
             {
               meterNumber: beneficiary.meterNo,
               meterType: beneficiary.meterType,
-              provider: beneficiary.provider,
+              provider: {
+                logo: getElectricityProviderLogoFromText(name),
+                name,
+                serviceId: beneficiary.provider.service_id,
+              },
             },
             { keepTouched: true }
           );
