@@ -34,12 +34,22 @@ export const WalletFundPaymentScreen: FC<WalletFundPaymentScreenProps> = () => {
   const verifyPayment = async () => {
     try {
       loader.show("Verifying Payment...");
-      await verifyWalletFunding(reference, provider);
+      const res = await verifyWalletFunding(reference, provider);
       Toast.success("Wallet funding successful");
-      const profile = await getProfile();
-      syncProfile(profile);
+
+      // after verification fetch profile to sync balance
+      // but if that fails, we update balance in state
+      try {
+        const profile = await getProfile();
+        syncProfile(profile);
+      } catch (error) {
+        // @ts-expect-error we can provide fewer fields, it would be merged with current state
+        syncProfile({
+          balance: res.balance?.toString(),
+        });
+        logger.error("Failed to fetch profile", { error });
+      }
     } catch (err: any) {
-      console.log(err.response);
       Toast.error("Something went wrong verifying your payment", {
         text1: "Verification Failed",
         text2: "Payment verification failed",
