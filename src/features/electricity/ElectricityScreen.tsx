@@ -205,19 +205,6 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
           Toast.success("Electricity top-up successful");
           requestAppStoreReview();
           txDetailRef.details = data; // temp store tx details
-          // txDetailRef.details = {
-          //   ...data,
-          //   response: {
-          //     ...data.response,
-          //     content: {
-          //       ...data.response.content,
-          //       transactions: {
-          //         ...data.response.content.transactions,
-          //         status: "pending",
-          //       },
-          //     },
-          //   },
-          // }; // temp store tx details
 
           router.replace("/(protected)/electricity/tx_details");
         };
