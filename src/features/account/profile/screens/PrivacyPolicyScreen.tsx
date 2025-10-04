@@ -26,7 +26,7 @@ export const PrivacyPolicyScreen: FC<PrivacyPolicyScreenProps> = (props) => {
           return false; // prevent WebView from handling it
         }}
         originWhitelist={["*"]}
-        source={{ uri: WEBSITE! }}
+        source={{ uri: `${WEBSITE}/privacy_policy` }}
       />
     </Box>
   );

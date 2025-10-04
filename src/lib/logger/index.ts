@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/react-native";
 type MsgType = "info" | "warn" | "error" | "debug";
 type Tags = Record<string, string>;
 
-const log = (msgType: MsgType, msg: string, ctx: any = {}, tags?: Tags) => {
+const log = (msgType: MsgType, msg: string, ctx?: any, tags?: Tags) => {
   const timestamp = new Date().toISOString();
   const formattedMsg = `[${timestamp}] [${msgType}] ${msg}`;
 
@@ -47,16 +47,16 @@ const log = (msgType: MsgType, msg: string, ctx: any = {}, tags?: Tags) => {
       console.info(formattedMsg, JSON.stringify(ctx));
       break;
     case "warn":
-      console.warn(formattedMsg, JSON.stringify(ctx));
+      console.warn(formattedMsg, JSON.stringify(ctx || ""));
       break;
     case "error":
-      console.error(formattedMsg, JSON.stringify(ctx));
+      console.error(formattedMsg, JSON.stringify(ctx || ""));
       break;
     case "debug":
-      console.debug(formattedMsg, JSON.stringify(ctx));
+      console.debug(formattedMsg, JSON.stringify(ctx || ""));
       break;
     default:
-      console.log(formattedMsg, JSON.stringify(ctx));
+      console.log(formattedMsg, JSON.stringify(ctx || ""));
       break;
   }
 };
