@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api";
 import { APIResponse } from "@/types";
 import { AxiosResponse } from "axios";
 import {
+  PaymentMetadataRes,
   PaymentProvider,
   PaymentRef,
   WalletFundingVerificationRes,
@@ -38,6 +39,13 @@ export const verifyWalletFunding = async (
         reference,
       },
     }
+  );
+  return res.data.data;
+};
+
+export const getPaymentMetadata = async () => {
+  const res = await apiClient.get<APIResponse<PaymentMetadataRes>>(
+    "/paymentdetails"
   );
   return res.data.data;
 };
