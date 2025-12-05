@@ -3,6 +3,7 @@ import { electricityTopupSchema } from "./schema";
 
 export type ElectricityTxStatus = "pending" | "initiated" | "delivered";
 export interface IElectricityTx {
+  token: string; // formatted token string
   id: number;
   user_id: string;
   request_id: string;

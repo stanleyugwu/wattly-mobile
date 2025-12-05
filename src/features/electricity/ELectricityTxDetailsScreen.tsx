@@ -121,8 +121,10 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   );
 
   const token =
-    (tx.response.token || tx.response.purchased_code || "").match(/\d+/)?.[0] ??
-    "";
+    (tx.token || tx.response.token || tx.response.purchased_code) ?? "";
+  if (!token)
+    logger.error("ElectricityTxDetailsScreen:: No token found", { tx });
+
   const meterNo =
     getFirstValidValue(tx.billers_code, tx.response.meterNumber) || "";
   const meterType = tx.variation_code;

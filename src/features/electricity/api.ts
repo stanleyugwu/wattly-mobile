@@ -42,7 +42,6 @@ export const topUpElectricity = async (
   data: ElectricityTopupReqPayload,
   config?: AxiosRequestConfig<ElectricityTopupReqPayload>
 ): Promise<IElectricityTopupResData> => {
-  console.log(data);
   const { data: res } = await apiClient.post<
     any,
     AxiosResponse<APIResponse<IElectricityTopupResData>>,
