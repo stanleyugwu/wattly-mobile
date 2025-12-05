@@ -21,6 +21,13 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
+    // Simple API call logging
+    const startTime = Date.now();
+    (config as any).startTime = startTime;
+    if (__DEV__) {
+      console.log(`🌐 API Call: ${config.method?.toUpperCase()} ${config.url}`);
+    }
+
     return config;
   },
   (error) => {
@@ -31,6 +38,16 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
+    // Simple response logging
+    const duration = Date.now() - (response.config as any).startTime;
+    if (__DEV__) {
+      console.log(
+        `✅ API Response: ${response.config.method?.toUpperCase()} ${
+          response.config.url
+        } - ${response.status} (${duration}ms)`
+      );
+    }
+
     // Handle successful responses
     return response;
   },
