@@ -19,6 +19,5 @@ export type PaymentMetadataRes = {
     accountName: string;
     accountNumber: string;
     bankName: string;
-    status: string;
   };
 };
