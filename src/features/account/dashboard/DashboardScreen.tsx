@@ -193,7 +193,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           flexDirection={"row"}
         >
           <Text variant={"body"} fontFamily={"PrimaryBold"}>
-            Recent Transfers
+            Recent Transactions
           </Text>
           <Text
             variant={"small"}

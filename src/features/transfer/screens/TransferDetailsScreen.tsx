@@ -45,7 +45,6 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
 
   const isSender =
     sender_id?.toString()?.trim() === user?.profile?.id?.toString().trim();
-
   const transferDate = dayjs(created_at).format("Do MMMM YYYY h:mm A");
 
   const handleShareAsImage = async () => {
@@ -94,7 +93,7 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
                 textAlign={"center"}
                 fontFamily={"PrimaryBold"}
               >
-                Transfer Successful{" "}
+                Transaction Successful{" "}
                 <AntDesign name="checksquare" color={"green"} size={s(15)} />
               </Text>
             </Box>
@@ -109,7 +108,7 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
               label={isSender ? "Receipient Name" : "Received From"}
               value={isSender ? recipient_name : sender_name}
             />
-            {isSender ? (
+            {isSender && recipient_account_number ? (
               <DetailText
                 label="Account Number"
                 value={recipient_account_number?.toString()}

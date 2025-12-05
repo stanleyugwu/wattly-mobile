@@ -63,8 +63,8 @@ export default function ProtectedLayout() {
       <Stack.Screen
         name="transfer/transfer_details/[reference]"
         options={{
-          headerTitle: "Transfer Receipt",
-          title: "Transfer Receipt",
+          headerTitle: "Transaction Receipt",
+          title: "Transaction Receipt",
           headerTitleAlign: "center",
           headerShadowVisible: false,
         }}
@@ -72,8 +72,8 @@ export default function ProtectedLayout() {
       <Stack.Screen
         name="transfer/transfer_history"
         options={{
-          headerTitle: "Transfer History",
-          title: "Transfer History",
+          headerTitle: "Transaction History",
+          title: "Transaction History",
           headerBackTitle: "Transfer",
         }}
       />
