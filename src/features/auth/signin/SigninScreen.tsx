@@ -23,6 +23,7 @@ export const SigninScreen = () => {
   const {
     control,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
@@ -111,12 +112,14 @@ export const SigninScreen = () => {
           <Controller
             control={control}
             name="email"
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { onChange, value, ref } }) => (
               <TextInput
+                ref={ref}
                 autoFocus
                 placeholder="Enter your email address"
                 value={value}
                 onChangeText={onChange}
+                onSubmitEditing={() => setFocus("password")}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={errors.email?.message}
@@ -130,10 +133,11 @@ export const SigninScreen = () => {
           <Controller
             control={control}
             name="password"
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { onChange, value, ref } }) => (
               <TextInput
                 onChangeText={onChange}
                 value={value}
+                ref={ref}
                 secureTextEntry
                 returnKeyLabel="Sign In"
                 onSubmitEditing={handleSignIn}

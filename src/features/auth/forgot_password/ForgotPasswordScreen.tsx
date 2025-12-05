@@ -72,6 +72,7 @@ export const ForgotPasswordScreen = () => {
             value={email}
             onFocus={() => setEmailError("")}
             placeholder="Email Address"
+            onSubmitEditing={handleSendPasswordResetOtp}
             onChangeText={(text) => setEmail(text)}
             error={emailError}
           />
