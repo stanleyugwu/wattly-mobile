@@ -78,6 +78,7 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
 
   const isPaystackAvailable = paymentMetadata?.paystack;
   const isFlutterwaveAvailable = paymentMetadata?.flutterwave;
+  const isManualPaymentAvailable = paymentMetadata?.manual;
 
   const amtInsufficient =
     !parseFloat(amount) || +amount < 100 || +amount > 1000000;
@@ -172,32 +173,31 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
           />
         )}
 
-        {(isFlutterwaveAvailable || isPaystackAvailable) && (
-          <Text textAlign={"center"} my={"l"}>
-            Or
-          </Text>
-        )}
-
-        {paymentMetadata && (
-          <Box variant={"surface"} rg={"xs"}>
-            <Text variant={"small"} textAlign={"center"} mb={"m"}>
-              Make a manual transfer using the details below. After payment,
-              please contact the admin to verify your transaction.
+        {isManualPaymentAvailable && (
+          <>
+            <Text textAlign={"center"} my={"l"}>
+              Or
             </Text>
+            <Box variant={"surface"} rg={"xs"}>
+              <Text variant={"small"} textAlign={"center"} mb={"m"}>
+                Make a manual transfer using the details below. After payment,
+                please contact the admin to verify your transaction.
+              </Text>
 
-            <Text mt={"s"}>Bank Name</Text>
-            <DetailBox detail={BANK_NAME} />
+              <Text mt={"s"}>Bank Name</Text>
+              <DetailBox detail={BANK_NAME} />
 
-            <Text mt={"s"}>Account Number</Text>
-            <DetailBox detail={ACCOUNT_NUMBER} />
+              <Text mt={"s"}>Account Number</Text>
+              <DetailBox detail={ACCOUNT_NUMBER} />
 
-            <Text mt={"s"}>Account Name</Text>
-            <DetailBox detail={ACCOUNT_NAME} />
+              <Text mt={"s"}>Account Name</Text>
+              <DetailBox detail={ACCOUNT_NAME} />
 
-            <Box alignItems={"center"} mt={"l"}>
-              <Button label="Contact Admin" onPress={contactAdmin} />
+              <Box alignItems={"center"} mt={"l"}>
+                <Button label="Contact Admin" onPress={contactAdmin} />
+              </Box>
             </Box>
-          </Box>
+          </>
         )}
       </ScreenBox>
 

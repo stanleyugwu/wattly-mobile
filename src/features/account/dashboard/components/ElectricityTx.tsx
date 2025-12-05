@@ -22,7 +22,8 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
   const { styles } = useTheme();
 
   // E.g product name: "Ikeja Electric Payment - IKEDC"
-  const providerName = tx?.response?.content?.transactions?.product_name || "";
+  const providerName =
+    tx?.response?.content?.transactions?.product_name || "Electricity";
 
   const meterNo = getFirstValidValue(
     tx?.response?.meterNumber,

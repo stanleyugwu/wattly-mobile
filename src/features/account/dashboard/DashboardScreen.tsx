@@ -1,4 +1,4 @@
-import React, { type FC } from "react";
+import React, { useEffect, type FC } from "react";
 import { vs } from "react-native-size-matters";
 
 import {
@@ -11,13 +11,17 @@ import {
 } from "@/components";
 import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
+import { GET_PAYMENT_METADATA_QUERY_KEY } from "@/features/wallet/hooks";
+import { queryClient } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { createStyleHook } from "@/lib/utils";
+import { getProfile } from "@/services/api";
 import { Images } from "@assets/index";
 import { router } from "expo-router";
-import { Platform, Pressable, ScrollView } from "react-native";
+import { Platform, Pressable, RefreshControl, ScrollView } from "react-native";
 import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
 import { useGetTransferHistory } from "../../transfer";
-import { WalletTxSkeleton } from "../../wallet";
+import { WalletApis, WalletTxSkeleton } from "../../wallet";
 import { CurvyIconButton, ElectricityTx, Wallet, WalletTx } from "./components";
 
 interface DashboardScreenProps {}
@@ -31,12 +35,47 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
   const electrictyTxs = useGetElectricityTxs();
   const walletTxs = useGetTransferHistory();
+  const { syncProfile } = useAuth();
 
   const electricityData = electrictyTxs.data?.slice(0, 2) || [];
   const walletData = walletTxs.data?.slice(0, 5) || [];
 
+  const handleRefresh = async () => {
+    electrictyTxs.refetch();
+    walletTxs.refetch();
+    getProfile()
+      .then((res) => {
+        syncProfile(res);
+      })
+      .catch((err) => {
+        logger.warn("Failed to fetch profile", { error: err.message });
+      });
+  };
+
+  //  prefetch payment options request for speed
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: GET_PAYMENT_METADATA_QUERY_KEY,
+      queryFn: WalletApis.getPaymentMetadata,
+      isDataEqual(oldData, newData) {
+        return JSON.stringify(oldData) === JSON.stringify(newData);
+      },
+    });
+  }, []);
+
   return (
-    <ScreenBox rowGap={"xxl"}>
+    <ScreenBox
+      rowGap={"xxl"}
+      scrollViewProps={{
+        refreshControl: (
+          <RefreshControl
+            onRefresh={handleRefresh}
+            refreshing={electrictyTxs.isRefetching || walletTxs.isRefetching}
+            title="Refreshing"
+          />
+        ),
+      }}
+    >
       <Box
         flexDirection={"row"}
         alignItems={"center"}
