@@ -3,12 +3,15 @@ import { s } from "react-native-size-matters";
 
 import { Box, Image, ScreenBox, Text } from "@/components";
 import { useAuth } from "@/contexts/auth";
+import { logger } from "@/lib/logger";
+import { Toast } from "@/lib/toast";
 import { createStyleHook } from "@/lib/utils";
 import { useTheme } from "@/theme";
 import { Images } from "@assets/index";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { Href, router } from "expo-router";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, Pressable, TouchableOpacity } from "react-native";
 
 interface MenuButtonProps {
   label: string;
@@ -46,7 +49,7 @@ interface ProfileScreenProps {}
  * Component for `ProfileScreen` screen
  */
 export const ProfileScreen: FC<ProfileScreenProps> = (props) => {
-  const { styles, palette } = useStyles();
+  const { styles, palette, colors } = useStyles();
   const { user, signOut } = useAuth();
 
   const navigate = (path: Href) => () => router.navigate(path);
@@ -59,10 +62,24 @@ export const ProfileScreen: FC<ProfileScreenProps> = (props) => {
   };
 
   const profilePicUrl = `${user?.profile.profile_url}`;
+  const accountNumber = user?.profile?.account_number || "";
+
+  const handleCopy = async () => {
+    try {
+      await Clipboard.setStringAsync(accountNumber, {
+        inputFormat: Clipboard.StringFormat.PLAIN_TEXT,
+      });
+      Toast.success("Account number copied");
+    } catch (error) {
+      logger.error("AddMoneyToWalletScreen:: Failed to copy account number", {
+        error,
+      });
+    }
+  };
 
   return (
     <ScreenBox rg={"xxl"}>
-      <Box alignItems={"center"} justifyContent={"center"} rg={"xs"}>
+      <Box justifyContent={"center"} rg={"xs"}>
         <Image
           source={profilePicUrl}
           contentFit="contain"
@@ -78,6 +95,28 @@ export const ProfileScreen: FC<ProfileScreenProps> = (props) => {
         >
           {user?.profile.name}
         </Text>
+
+        <Box
+          variant={"surface"}
+          flexDirection={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+        >
+          <Box>
+            <Text variant={"small"} color={"textMuted"}>
+              Account Number
+            </Text>
+            <Text variant={"body"} fontFamily={"PrimaryBold"}>
+              {user?.profile?.account_number}
+            </Text>
+          </Box>
+          <Pressable
+            hitSlop={{ left: 30, right: 20, top: 10, bottom: 10 }}
+            onPress={handleCopy}
+          >
+            <Ionicons name="copy-outline" size={s(18)} color={colors.primary} />
+          </Pressable>
+        </Box>
       </Box>
 
       <Box variant={"surface"} rg={"xl"}>
@@ -124,7 +163,15 @@ const useStyles = createStyleHook(({ borderRadii, colors }) => ({
     width: "65@s",
     height: "65@s",
     borderWidth: 1,
+    alignSelf: "center",
     borderColor: colors.border,
     borderRadius: borderRadii.round,
+  },
+
+  copyBtn: {
+    position: "absolute",
+    right: "4%",
+    top: "50%",
+    zIndex: 900,
   },
 }));

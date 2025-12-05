@@ -136,22 +136,38 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
 
       <Box variant={"surface"} rg={"s"}>
         {electricityData.length ? (
-          <Pressable
-            style={{ alignItems: "center" }}
-            onPress={() => router.navigate("/(protected)/electricity")}
+          <Box
+            flexDirection={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
           >
-            <Box
-              bg={"primary"}
-              p={"xxs"}
-              alignSelf={"flex-start"}
-              px={"s"}
-              borderRadius={"xs"}
+            <Pressable
+              style={{ alignItems: "center" }}
+              onPress={() => router.navigate("/(protected)/electricity")}
             >
-              <Text variant={"small"} color={"primaryText"}>
-                Buy Again
-              </Text>
-            </Box>
-          </Pressable>
+              <Box
+                bg={"primary"}
+                p={"xxs"}
+                alignSelf={"flex-start"}
+                px={"s"}
+                borderRadius={"xs"}
+              >
+                <Text variant={"small"} color={"primaryText"}>
+                  Buy Again
+                </Text>
+              </Box>
+            </Pressable>
+            <Text
+              variant={"small"}
+              color={"primary"}
+              fontFamily={"PrimaryBold"}
+              onPress={() =>
+                router.navigate("/(protected)/electricity/tx_history")
+              }
+            >
+              See more
+            </Text>
+          </Box>
         ) : null}
 
         {/* Loader */}
@@ -182,6 +198,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           <Text
             variant={"small"}
             color={"primary"}
+            fontFamily={"PrimaryBold"}
             onPress={() =>
               router.navigate("/(protected)/transfer/transfer_history")
             }
