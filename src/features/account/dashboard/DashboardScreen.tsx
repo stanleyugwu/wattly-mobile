@@ -1,5 +1,5 @@
 import React, { useEffect, type FC } from "react";
-import { vs } from "react-native-size-matters";
+import { s, vs } from "react-native-size-matters";
 
 import {
   Box,
@@ -18,7 +18,7 @@ import { createStyleHook } from "@/lib/utils";
 import { getProfile } from "@/services/api";
 import { Images } from "@assets/index";
 import { router } from "expo-router";
-import { Platform, Pressable, RefreshControl, ScrollView } from "react-native";
+import { Pressable, RefreshControl, ScrollView } from "react-native";
 import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
 import { useGetTransferHistory } from "../../transfer";
 import { WalletApis, WalletTxSkeleton } from "../../wallet";
@@ -234,10 +234,7 @@ const useStyles = createStyleHook(({ borderRadii, colors }) => ({
   btnScrollView: {
     flex: 1,
     position: "absolute",
-    top: Platform.select({
-      android: -13,
-      ios: -10,
-    }),
+    top: s(-9),
   },
   profilePic: {
     width: "45@s",

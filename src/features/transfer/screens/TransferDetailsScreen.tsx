@@ -93,7 +93,9 @@ export const TransferDetailsScreen: FC<TransferDetailsScreenProps> = (
                 textAlign={"center"}
                 fontFamily={"PrimaryBold"}
               >
-                Transaction Successful{" "}
+                {isSender && recipient_account_number
+                  ? "Transfer Successful"
+                  : "Transaction Successful"}
                 <AntDesign name="checksquare" color={"green"} size={s(15)} />
               </Text>
             </Box>
