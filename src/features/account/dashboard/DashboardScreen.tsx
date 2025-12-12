@@ -1,5 +1,4 @@
 import React, { useEffect, type FC } from "react";
-import { s, vs } from "react-native-size-matters";
 
 import {
   Box,
@@ -19,7 +18,12 @@ import { getProfile } from "@/services/api";
 import { Images } from "@assets/index";
 import { router } from "expo-router";
 import { Pressable, RefreshControl, ScrollView } from "react-native";
-import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
+import {
+  ElectricityApis,
+  ElectricityTxSkeleton,
+  GET_SERVICE_CHARGE_KEY,
+  useGetElectricityTxs,
+} from "../../electricity";
 import { useGetTransferHistory } from "../../transfer";
 import { WalletApis, WalletTxSkeleton } from "../../wallet";
 import { CurvyIconButton, ElectricityTx, Wallet, WalletTx } from "./components";
@@ -31,7 +35,7 @@ interface DashboardScreenProps {}
  */
 export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
   const { user } = useAuth();
-  const { palette, styles } = useStyles();
+  const { palette, styles, spacing } = useStyles();
 
   const electrictyTxs = useGetElectricityTxs();
   const walletTxs = useGetTransferHistory();
@@ -52,7 +56,7 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
       });
   };
 
-  //  prefetch payment options request for speed
+  //  prefetch payment options and service charge requests for speed
   useEffect(() => {
     queryClient.prefetchQuery({
       queryKey: GET_PAYMENT_METADATA_QUERY_KEY,
@@ -61,11 +65,15 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
         return JSON.stringify(oldData) === JSON.stringify(newData);
       },
     });
+    queryClient.prefetchQuery({
+      queryKey: GET_SERVICE_CHARGE_KEY,
+      queryFn: ElectricityApis.getServiceCharge,
+    });
   }, []);
 
   return (
     <ScreenBox
-      rowGap={"xxl"}
+      rowGap={"xl"}
       scrollViewProps={{
         refreshControl: (
           <RefreshControl
@@ -102,37 +110,33 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
       </Box>
 
       <Wallet />
-      <Box justifyContent={"center"} alignItems={"center"}>
-        <Box
-          width={"100%"}
-          height={vs(30)}
-          borderRadius={"round"}
-          style={{ backgroundColor: palette.blue100 }}
+
+      <ScrollView
+        horizontal
+        style={styles.btnScrollView}
+        contentContainerStyle={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          columnGap: spacing.xs,
+        }}
+        showsHorizontalScrollIndicator={false}
+      >
+        <CurvyIconButton
+          label="Add Money"
+          Icon={<PlusIcon />}
+          onPress={() => router.navigate("/(protected)/wallet/add_money")}
         />
-        <ScrollView
-          style={styles.btnScrollView}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          <Box flexDirection={"row"} justifyContent={"space-between"}>
-            <CurvyIconButton
-              label="Add Money"
-              Icon={<PlusIcon />}
-              onPress={() => router.navigate("/(protected)/wallet/add_money")}
-            />
-            <CurvyIconButton
-              onPress={() => router.navigate("/(protected)/electricity")}
-              label="Electricity"
-              Icon={<BulbIcon />}
-            />
-            <CurvyIconButton
-              label="Transfer"
-              Icon={<TransferIcon />}
-              onPress={() => router.navigate("/(protected)/transfer")}
-            />
-          </Box>
-        </ScrollView>
-      </Box>
+        <CurvyIconButton
+          onPress={() => router.navigate("/(protected)/electricity")}
+          label="Electricity"
+          Icon={<BulbIcon />}
+        />
+        <CurvyIconButton
+          label="Transfer"
+          Icon={<TransferIcon />}
+          onPress={() => router.navigate("/(protected)/transfer")}
+        />
+      </ScrollView>
 
       <Box variant={"surface"} rg={"s"}>
         {electricityData.length ? (
@@ -233,8 +237,7 @@ DashboardScreen.displayName = "DashboardScreen";
 const useStyles = createStyleHook(({ borderRadii, colors }) => ({
   btnScrollView: {
     flex: 1,
-    position: "absolute",
-    top: s(-9),
+    alignSelf: "center",
   },
   profilePic: {
     width: "45@s",

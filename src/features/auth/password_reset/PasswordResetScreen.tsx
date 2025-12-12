@@ -52,7 +52,7 @@ export const PasswordResetScreen = () => {
   });
 
   return (
-    <ScreenBox inkeyboardView>
+    <ScreenBox inkeyboardView inSafeArea={{ top: false }}>
       <Image source={Images.logo} style={styles.logo} contentFit="contain" />
       <Text
         variant={"heading"}
@@ -74,7 +74,7 @@ export const PasswordResetScreen = () => {
         All good! Now setup a new strong password for your account
       </Text>
 
-      <Box gap={"xxl"} pt={"xxl"}>
+      <Box gap={"xxl"} pt={"xl"} variant={"surface"} mt={"l"}>
         <Box gap={"xs"}>
           <Text>New Password</Text>
           <Controller

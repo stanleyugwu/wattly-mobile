@@ -102,11 +102,11 @@ export const SigninScreen = () => {
         borderRadius={"round"}
         alignSelf={"center"}
       />
-      <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
+      <Text variant={"heading3"} color={"textMuted"} textAlign={"center"}>
         Welcome back, please login to continue
       </Text>
 
-      <Box gap={"xxl"} pt={"xxl"}>
+      <Box gap={"xxl"} pt={"xl"} variant={"surface"} mt={"l"}>
         <Box gap={"xs"}>
           <Text style={{ fontWeight: "black" }}>Email</Text>
           <Controller

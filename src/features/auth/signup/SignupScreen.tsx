@@ -65,7 +65,7 @@ export const SignupScreen = () => {
 
   return (
     <KeyboardAvoidingView behavior="height">
-      <ScreenBox>
+      <ScreenBox inSafeArea={{ top: false }}>
         <Image source={Images.logo} style={styles.logo} contentFit="contain" />
         <Text
           variant={"heading"}
@@ -83,11 +83,11 @@ export const SignupScreen = () => {
           borderRadius={"round"}
           alignSelf={"center"}
         />
-        <Text variant={"heading2"} color={"textMuted"} textAlign={"center"}>
+        <Text variant={"heading3"} color={"textMuted"} textAlign={"center"}>
           Setup your account to get started
         </Text>
 
-        <Box gap={"xxl"} pt={"xxl"}>
+        <Box gap={"xxl"} pt={"xl"} variant={"surface"} mt={"l"}>
           <Box gap={"xs"}>
             <Text style={{ fontWeight: "black" }}>Full Name</Text>
             <Controller
