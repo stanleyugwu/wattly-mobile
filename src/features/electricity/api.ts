@@ -8,6 +8,7 @@ import {
   IElectricityTopupResData,
   IElectricityTx,
   IMeterInfo,
+  ServiceChargeResPayload,
 } from "./types";
 
 export const getElectricityTxs = async (): Promise<IElectricityTx[]> => {
@@ -57,4 +58,11 @@ export const getTxStatus = async (requestId: string) => {
     { request_id: string }
   >("/requery", { request_id: requestId });
   return res.data;
+};
+
+export const getServiceCharge = async () => {
+  const { data: res } = await apiClient.get<ServiceChargeResPayload>(
+    "/bank/charge"
+  );
+  return res.charge;
 };

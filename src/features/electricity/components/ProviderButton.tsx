@@ -33,7 +33,7 @@ export const ProviderButton: FC<ProviderButtonProps> = memo(
         >
           <Image source={logo} style={styles.providerLogo} />
         </Box>
-        <Text fontFamily={"PrimaryBold"} style={{ flex: 1, flexWrap: "wrap" }}>
+        <Text variant={"small"} style={{ flex: 1, flexWrap: "wrap" }}>
           {provider.name}
         </Text>
       </Pressable>
@@ -45,7 +45,7 @@ const useStyles = createStyleHook(({ colors, spacing }) => ({
   providerBtn: {
     borderBottomWidth: 1,
     borderBottomColor: colors.background,
-    paddingVertical: spacing.m,
+    paddingVertical: spacing.s,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -53,9 +53,9 @@ const useStyles = createStyleHook(({ colors, spacing }) => ({
     flex: 1,
   },
   providerLogo: {
-    width: "35@s",
-    height: "35@s",
-    borderRadius: "25@s",
+    width: "30@s",
+    height: "30@s",
+    borderRadius: "10@s",
     aspectRatio: 1 / 1,
   },
 }));

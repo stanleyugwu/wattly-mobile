@@ -1,10 +1,15 @@
 import { User } from "@/types";
 import { IElectricityTx } from "./types";
 
-export const balanceSufficient = (user: User | null, amount?: string) => {
+export const balanceSufficient = (
+  user: User | null,
+  amount: string,
+  serviceCharge: string
+) => {
   const balance = parseFloat(user?.profile?.balance || "0");
   const topUpAmt = parseFloat(amount || "0");
-  if (!balance || !topUpAmt || balance < topUpAmt) return false;
+  const charge = parseFloat(serviceCharge || "0");
+  if (!balance || !topUpAmt || balance < topUpAmt + charge) return false;
   return true;
 };
 

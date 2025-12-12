@@ -164,3 +164,7 @@ export type ElectricityTopupReqPayload = {
 export type TxDetailRef = {
   details: IElectricityTx | null;
 };
+
+export type ServiceChargeResPayload = {
+  charge: `${number}`;
+};

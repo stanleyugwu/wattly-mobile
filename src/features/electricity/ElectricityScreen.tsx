@@ -1,8 +1,8 @@
-import { AntDesign, EvilIcons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useMemo, useRef, useState, type FC } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
@@ -40,7 +40,11 @@ import {
   ProviderSheet,
 } from "./components";
 import { CheckSelectButton } from "./components/CheckSelectButton";
-import { useGetElectricityProviders, useSavedBeneficiaries } from "./hooks";
+import {
+  useGetElectricityProviders,
+  useGetServiceCharge,
+  useSavedBeneficiaries,
+} from "./hooks";
 import { electricityTopupSchema } from "./schema";
 import { txDetailRef } from "./tx_detail_ref";
 import {
@@ -61,7 +65,7 @@ import {
 let meterInfoRequestController = new AbortController();
 
 const PREFILL_AMOUNTS = [
-  1000, 2000, 4000, 5000, 7000, 10000, 20000, 30000, 50000,
+  1000, 2000, 3000, 4000, 5000, 7000, 10000, 20000, 30000, 50000,
 ];
 
 interface ElectricityScreenProps {}
@@ -78,11 +82,12 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
     info: null,
   });
 
+  const serviceChargeQuery = useGetServiceCharge();
   const providers = useGetElectricityProviders();
   const { beneficiaries, deleteBeneficiary, saveBeneficiary } =
     useSavedBeneficiaries();
 
-  const { styles, colors, insets, palette, spacing, isDarkMode } = useStyles();
+  const { styles, colors, insets, spacing, palette } = useStyles();
   const loader = useOverlayLoader();
   const { user, syncProfile } = useAuth();
 
@@ -94,13 +99,17 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
     getValues,
     setError,
     clearErrors,
+    setFocus,
   } = useForm<ElectricityTopupFormData>({
     resolver: zodResolver(electricityTopupSchema),
     mode: "onSubmit",
     defaultValues: { meterType: "prepaid" },
     reValidateMode: "onChange",
-    shouldUseNativeValidation: true,
     shouldFocusError: true,
+  });
+
+  const { amount } = useWatch({
+    control,
   });
 
   const sheetProps = useMemo(
@@ -154,22 +163,38 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
     );
   }, []);
 
-  const deductBalance = (amount: string) => {
+  const deductBalance = (amount: string, serviceCharge: string) => {
     // @ts-expect-error
     syncProfile({
-      balance: (+(user?.profile.balance || "0") - +(amount || "0")).toString(),
+      balance: (
+        +(user?.profile.balance || "0") -
+        (+(amount || "0") + +(serviceCharge || "0"))
+      ).toString(),
     });
   };
 
   const handleSubmitForm = handleSubmit(async (formData) => {
+    // ensure service charge data is at least fetched
+    if (!serviceChargeQuery.data) return;
     // ensure meter details are verified before allowing recharge
     if (!meterInfo.info) return getMeterInfo(formData.meterNumber);
 
     // check wallet balance before allowing recharge
-    const balSufficient = balanceSufficient(user, formData.amount);
+    const balSufficient = balanceSufficient(
+      user,
+      formData.amount,
+      serviceChargeQuery.data
+    );
     if (!balSufficient)
       return Toast.error(
-        "Insufficient balance for transaction. Please top-up your wallet to continue"
+        "Insufficient balance for transaction. Tap here to top-up your wallet and continue",
+        {
+          text1: "Balance Insufficient",
+          onPress() {
+            router.navigate("/(protected)/wallet/add_money");
+          },
+          visibilityTime: 7000,
+        }
       );
 
     // all good, let's attempt recharge
@@ -204,7 +229,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
       // Check success
       const isSuccess = isTxSuccessful(data);
       if (isSuccess) {
-        deductBalance(formData.amount);
+        deductBalance(formData.amount, serviceChargeQuery.data);
         const completeTopup = () => {
           // successfully recharged, pass tx to details screen for viewing and sharing
           loader.hide();
@@ -272,7 +297,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
        */
       const isPending = isTxPending(data);
       if (isPending) {
-        deductBalance(formData.amount);
+        deductBalance(formData.amount, serviceChargeQuery.data);
         loader.hide();
         Toast.success("Electricity top-up initiated");
         txDetailRef.details = data; // temp store tx details
@@ -390,7 +415,7 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
       clearErrors("meterNumber");
     } catch (error) {
       setError("meterNumber", {
-        message: "Meter not found. Invalid meter number",
+        message: "Invalid meter number",
       });
       setMeterInfo({ info: null, verifying: false });
     }
@@ -399,6 +424,10 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
   const goToHistory = () => {
     router.navigate("/(protected)/electricity/tx_history");
   };
+
+  const serviceChargeInCur = formatCurrency(+(serviceChargeQuery.data || 0));
+  const getTotal = (amt: number | string) =>
+    formatCurrency(+amt + +(serviceChargeQuery.data || 0));
 
   return (
     <>
@@ -419,15 +448,21 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
                 flexDirection={"row"}
                 alignItems={"center"}
                 justifyContent={"center"}
+                backgroundColor={"surface"}
+                p={"xs"}
+                px={"s"}
+                borderRadius={"s"}
               >
-                <Text variant={"caption"} fontFamily={"PrimaryBold"} pt={"xxs"}>
-                  History
+                <Text variant={"small"} color={"primary"}>
+                  Topup History
                 </Text>
-                <EvilIcons
-                  name="chevron-right"
-                  size={scale(20)}
-                  color={colors.text}
-                />
+                <Box pt={"xxs"}>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={scale(16)}
+                    color={colors.primary}
+                  />
+                </Box>
               </Box>
             </Pressable>
           </Box>
@@ -452,19 +487,11 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
                     provider={selectedProvider?.name || "Select Provider"}
                     logo={selectedProvider?.logo}
                   />
-                  <Box
-                    width={"100%"}
-                    height={1}
-                    mt={"xs"}
-                    style={{
-                      backgroundColor: isDarkMode
-                        ? palette.gray900
-                        : palette.gray100,
-                    }}
-                  />
-                  <Text variant={"small"} color={"error"}>
-                    {error?.message}
-                  </Text>
+                  {error?.message ? (
+                    <Text variant={"small"} color={"error"}>
+                      {error?.message}
+                    </Text>
+                  ) : null}
                 </Box>
               )}
             />
@@ -514,12 +541,16 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
                     justifyContent={"center"}
                     alignSelf={"flex-end"}
                   >
-                    <Text variant={"caption"}>Beneficiaries</Text>
-                    <EvilIcons
-                      name="chevron-right"
-                      size={scale(24)}
-                      color={colors.text}
-                    />
+                    <Text variant={"small"} color={"primary"}>
+                      Beneficiaries
+                    </Text>
+                    <Box pt={"xxs"}>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={scale(16)}
+                        color={colors.primary}
+                      />
+                    </Box>
                   </Box>
                 </Pressable>
               ) : null}
@@ -530,17 +561,22 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               name="meterNumber"
               control={control}
               render={({
-                field: { value, onChange },
+                field: { value, onChange, ref },
                 fieldState: { error },
               }) => (
                 <TextInput
                   keyboardType="number-pad"
                   placeholder="Enter Meter Number"
                   value={value}
+                  ref={ref}
                   onChangeText={onChange}
                   onBlur={() => {
-                    if (value && !error?.message) getMeterInfo(value);
+                    if (value) {
+                      clearErrors("meterNumber");
+                      getMeterInfo(value);
+                    }
                   }}
+                  onSubmitEditing={() => setFocus("phone")}
                   error={error?.message}
                   style={[
                     styles.meterNoInput,
@@ -554,20 +590,34 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               )}
             />
             {meterInfo.verifying || meterInfo.info ? (
-              <Box flexDirection={"row"} alignItems={"center"} cg={"xxs"}>
+              <Box
+                flexDirection={"row"}
+                alignItems={"center"}
+                cg={"xxs"}
+                p={"xs"}
+                borderRadius={"s"}
+                backgroundColor={"background"}
+              >
                 {meterInfo.verifying ? (
                   <Box flexDirection={"row"} cg={"xxs"} alignItems={"center"}>
                     <ActivityIndicator color={colors.primary} size={"small"} />
-                    <Text variant={"small"}>Verifying meter number</Text>
+                    <Text variant={"small"} fontFamily={"PrimaryBold"}>
+                      Verifying meter number
+                    </Text>
                   </Box>
                 ) : (
                   <>
                     <AntDesign
-                      size={s(12)}
+                      size={s(13)}
                       name="checkcircle"
                       color={colors.primary}
                     />
-                    <Text variant={"caption"} fontFamily={"PrimaryBold"}>
+                    <Text
+                      style={{ fontSize: s(11) }}
+                      variant={"small"}
+                      ml={"xs"}
+                      fontFamily={"PrimaryBold"}
+                    >
                       {meterInfo.info?.content?.Customer_Name}
                       {" - "}
                       {meterInfo.info?.content?.Address}
@@ -587,13 +637,15 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               name="phone"
               control={control}
               render={({
-                field: { value, onChange },
+                field: { value, onChange, ref },
                 fieldState: { error },
               }) => (
                 <TextInput
                   keyboardType="number-pad"
                   placeholder="Enter Phone Number"
                   value={value}
+                  ref={ref}
+                  onSubmitEditing={() => setFocus("amount")}
                   onChangeText={onChange}
                   error={error?.message}
                   style={styles.meterNoInput}
@@ -611,68 +663,165 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
               control={control}
               name="amount"
               render={({
-                field: { value, onChange },
+                field: { value, onChange, ref },
                 fieldState: { error },
               }) => (
                 <Box>
-                  <Box flexDirection={"row"} alignItems={"center"} cg={"xl"}>
+                  <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
                     <Box
                       flexDirection={"row"}
                       alignItems={"center"}
-                      borderBottomWidth={1}
+                      borderWidth={1}
+                      borderRadius={"m"}
+                      pl={"m"}
                       flex={1}
-                      style={{ borderBottomColor: palette.gray300 }}
+                      style={{ borderColor: colors.border }}
                     >
-                      <Text fontFamily={"PrimaryBold"}>{"\u20A6"}</Text>
+                      <Text
+                        fontFamily={"PrimaryBold"}
+                        onPress={() => setFocus("amount")}
+                      >
+                        {"\u20A6"}
+                      </Text>
                       <TextInput
                         keyboardType="number-pad"
                         placeholder="Amount"
+                        ref={ref}
                         value={value?.toString()}
                         onChangeText={onChange}
                         style={{
                           borderWidth: 0,
-                          marginLeft: s(-8),
                           flex: 1,
                         }}
                       />
                     </Box>
                     <Pressable
-                      onPress={handleSubmitForm}
-                      style={[styles.payBtn, { opacity: value ? 1.0 : 0.7 }]}
-                      disabled={!value}
+                      onPress={() => {
+                        handleSubmitForm();
+                      }}
+                      style={[styles.payBtn, { opacity: value ? 1.0 : 0.5 }]}
+                      disabled={!value || !serviceChargeQuery.data}
                     >
-                      <Text color={"primaryText"}>PAY</Text>
+                      <Text color={"primaryText"} fontFamily={"PrimaryBold"}>
+                        TOP UP
+                      </Text>
                     </Pressable>
                   </Box>
-                  <Text variant={"small"} color={"error"}>
-                    {error?.message}
-                  </Text>
+                  {error?.message ? (
+                    <Text variant={"small"} color={"error"}>
+                      {error?.message}
+                    </Text>
+                  ) : null}
                 </Box>
               )}
             />
-            <Box flexDirection={"row"} flexWrap={"wrap"} g={"l"} mt={"s"}>
+
+            {/* Total */}
+            {amount ? (
+              <Box
+                flexDirection={"row"}
+                bg={"background"}
+                alignItems={"center"}
+                justifyContent={"space-between"}
+                borderRadius={"xs"}
+                p={"xs"}
+                cg={"xxs"}
+              >
+                <Box flexDirection={"row"} alignItems={"center"} cg={"xxs"}>
+                  <Text variant={"small"} numberOfLines={3}>
+                    Total: {formatCurrency(+amount || 0)} + {serviceChargeInCur}{" "}
+                    =
+                    <Text variant={"small"} fontFamily={"PrimaryBold"}>
+                      {" "}
+                      {getTotal(+amount || 0)}
+                    </Text>
+                  </Text>
+                </Box>
+              </Box>
+            ) : null}
+
+            {/* Fees */}
+            <Box backgroundColor={"background"} p="xs" borderRadius={"xs"}>
+              <Box flexDirection={"row"} alignItems={"center"} cg={"xxs"}>
+                <Ionicons
+                  name="information-circle-sharp"
+                  size={s(14)}
+                  color={colors.warning}
+                />
+                <Text variant={"small"} fontFamily={"PrimaryBold"}>
+                  Fees
+                </Text>
+              </Box>
+
+              {/* Service Charge */}
+              {serviceChargeQuery.isLoading ? (
+                <Box flexDirection={"row"} alignItems={"center"} cg={"xxs"}>
+                  <ActivityIndicator
+                    style={{ alignSelf: "flex-start" }}
+                    color={colors.primary}
+                    size={"small"}
+                  />
+                  <Text variant={"small"} color={"textMuted"}>
+                    Loading...
+                  </Text>
+                </Box>
+              ) : serviceChargeQuery.data ? (
+                <Box>
+                  <Box flexDirection={"row"} alignItems={"center"} cg={"xxs"}>
+                    <Text variant={"small"} fontStyle={"italic"}>
+                      Service Fee:
+                    </Text>
+                    <Text variant={"small"} fontStyle={"italic"}>
+                      {serviceChargeInCur}
+                    </Text>
+                  </Box>
+                </Box>
+              ) : null}
+            </Box>
+
+            {/* Amount prefill buttons */}
+            <Box
+              flexDirection={"row"}
+              flexWrap={"wrap"}
+              alignItems={"center"}
+              alignContent={"center"}
+              g={"xs"}
+              mt={"s"}
+            >
               {PREFILL_AMOUNTS.map((amount) => (
                 <Pressable
                   key={amount}
-                  onPress={() => {
+                  disabled={!serviceChargeQuery.data}
+                  onPress={(e) => {
                     setValue("amount", amount.toString());
                     handleSubmitForm();
                   }}
                   style={styles.prefilAmtBtn}
                 >
                   <Box
-                    variant={"elevated"}
-                    bg={"background"}
-                    style={{
-                      backgroundColor: colors.background,
-                      padding: spacing.xl,
-                      shadowColor: palette.blue300,
-                    }}
+                    minWidth={s(90)}
+                    bg={"primary"}
+                    padding={"xs"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
                     borderRadius={"s"}
                   >
-                    <Text fontFamily={"PrimaryBold"}>
+                    <Text
+                      fontFamily={"PrimaryBold"}
+                      color={"primaryText"}
+                      variant={"small"}
+                    >
                       {formatCurrency(amount, { maximumFractionDigits: 0 })}
                     </Text>
+                    {serviceChargeQuery.data ? (
+                      <Text
+                        variant={"caption"}
+                        fontFamily={"PrimaryBold"}
+                        style={{ fontSize: s(10), color: palette.white600 }}
+                      >
+                        Pay {getTotal(+amount || 0)}
+                      </Text>
+                    ) : null}
                   </Box>
                 </Pressable>
               ))}
@@ -694,15 +843,34 @@ export const ElectricityScreen: FC<ElectricityScreenProps> = (props) => {
             },
             { shouldValidate: true }
           );
-          setValue("meterNumber", "");
+          setValue("meterNumber", "", {
+            shouldDirty: false,
+            shouldTouch: false,
+            shouldValidate: false,
+          });
           setMeterInfo({ info: null, verifying: false });
           providerSheetRef.current?.close();
+          setFocus("meterNumber");
         }}
       />
-      <BottomSheet {...sheetProps} ref={beneficiariesSheetRef}>
-        <Text variant={"heading3"} m={"s"}>
-          Beneficiaries
-        </Text>
+      <BottomSheet
+        enablePanDownToClose
+        {...sheetProps}
+        ref={beneficiariesSheetRef}
+      >
+        <Box>
+          <Text variant={"heading3"} textAlign={"center"} mt={"s"}>
+            Beneficiaries
+          </Text>
+          <Text
+            variant={"small"}
+            color={"textMuted"}
+            textAlign={"center"}
+            mb={"s"}
+          >
+            Select a beneficiary to top-up for
+          </Text>
+        </Box>
         <BottomSheetFlatList
           data={beneficiaries || []}
           ListEmptyComponent={renderNoBeneficiaryView}
@@ -727,15 +895,13 @@ const useStyles = createStyleHook(
   ({ colors, spacing, borderRadii, isDarkMode, palette }) => ({
     payBtn: {
       backgroundColor: colors.primary,
-      padding: spacing.xxs,
+      padding: spacing.s,
       paddingHorizontal: spacing.xl,
       borderRadius: spacing.xxs,
     },
     meterNoInput: {
-      borderBottomWidth: 1,
-      borderWidth: 0,
-      borderBottomColor: isDarkMode ? palette.gray900 : palette.gray100,
-      marginLeft: "-8@s",
+      borderWidth: 1,
+      borderColor: isDarkMode ? palette.gray900 : palette.gray100,
     },
     providerSheetStyle: {
       padding: spacing.m,
