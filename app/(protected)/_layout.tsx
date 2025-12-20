@@ -72,6 +72,7 @@ export default function ProtectedLayout() {
         options={{
           headerTitle: "Transaction Receipt",
           title: "Transaction Receipt",
+          headerBackTitle: "Back",
           headerTitleAlign: "center",
           headerShadowVisible: false,
         }}
