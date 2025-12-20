@@ -3,7 +3,7 @@ import { logger } from "@/lib/logger";
 import {
   createStyleHook,
   formatCurrency,
-  getElectricityProviderLogoFromText,
+  getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
 } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -32,7 +32,7 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
   }
 
   const providerName = tx.response.content?.transactions?.product_name || "";
-  const providerLogo = getElectricityProviderLogoFromText(providerName);
+  const providerLogo = getElectricityProviderLogoFromServiceId(tx.service_id);
   const amount = formatCurrency(
     parseFloat(
       getFirstValidValue(

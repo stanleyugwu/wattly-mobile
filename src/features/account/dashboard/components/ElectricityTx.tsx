@@ -5,7 +5,7 @@ import { txDetailRef } from "@/features/electricity/tx_detail_ref";
 import { IElectricityTx } from "@/features/electricity/types";
 import {
   createStyleHook,
-  getElectricityProviderLogoFromText,
+  getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
 } from "@/lib/utils";
 import { router } from "expo-router";
@@ -31,9 +31,7 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
     tx?.response?.token
   );
 
-  const providerLogo = getElectricityProviderLogoFromText(
-    tx?.response?.content?.transactions?.product_name
-  );
+  const providerLogo = getElectricityProviderLogoFromServiceId(tx?.service_id);
 
   const viewTx = () => {
     txDetailRef.details = tx;
