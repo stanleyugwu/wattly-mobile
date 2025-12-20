@@ -7,6 +7,7 @@ import {
   createStyleHook,
   getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
+  normalizeProvidername,
 } from "@/lib/utils";
 import { router } from "expo-router";
 import { Pressable } from "react-native";
@@ -22,8 +23,10 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
   const { styles } = useTheme();
 
   // E.g product name: "Ikeja Electric Payment - IKEDC"
-  const providerName =
-    tx?.response?.content?.transactions?.product_name || "Electricity";
+  const providerName = normalizeProvidername(
+    tx?.response?.content?.transactions?.product_name,
+    tx?.service_id
+  );
 
   const meterNo = getFirstValidValue(
     tx?.response?.meterNumber,
@@ -49,7 +52,7 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
             <Text fontFamily={"PrimaryBold"} variant={"small"}>
               {providerName}
             </Text>
-            <Text variant={"small"}>({meterNo || "N/A"})</Text>
+            <Text variant={"small"}>{meterNo ? `(${meterNo})` : "--"}</Text>
           </Box>
         </Box>
       </Box>

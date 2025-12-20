@@ -2,6 +2,7 @@ export const palette = {
   black: "#000000",
   black400: "rgba(0, 0, 0, 0.4)",
   black100: "#0000001A",
+  midnightSlate: "#111827",
 
   white: "#FFFFFF",
   white400: "rgba(255, 255, 255, 0.4)",

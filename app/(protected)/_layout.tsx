@@ -36,6 +36,13 @@ export default function ProtectedLayout() {
         }}
       />
       <Stack.Screen
+        name="electricity/tx_receipt/[tx_id]"
+        options={{
+          title: "Electricity Topup Receipt",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
         name="electricity/tx_history"
         options={{
           headerTitle: "Electricity Transactions",

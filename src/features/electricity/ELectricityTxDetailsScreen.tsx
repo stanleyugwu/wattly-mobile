@@ -2,10 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
-import React, { useRef, useState, type FC } from "react";
-import { Pressable } from "react-native";
+import React, { useState, type FC } from "react";
+import { Alert, Linking, Pressable } from "react-native";
 import { s } from "react-native-size-matters";
-import ViewShot from "react-native-view-shot";
 
 import { Box, Button, Image, ScreenBox, Text, TextProps } from "@/components";
 import { logger } from "@/lib/logger";
@@ -13,13 +12,14 @@ import { Toast } from "@/lib/toast";
 import {
   createStyleHook,
   formatCurrency,
-  getElectricityProviderLogoFromText,
+  getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
-  shareReceiptAsImage,
-  shareReceiptAsPdf,
+  normalizeProvidername,
 } from "@/lib/utils";
+import { ElectricityTopupStatusChip } from "./components";
 import { useTxStatusPolling } from "./hooks";
 import { txDetailRef } from "./tx_detail_ref";
+import { ElectricityReceiptPayload, MeterType } from "./types";
 import { isTxPending, isTxSuccessful } from "./utils";
 
 interface DetailTextProps extends TextProps {
@@ -35,13 +35,19 @@ export const DetailText: FC<DetailTextProps> = ({ label, value, ...rest }) => {
       alignItems={"center"}
       flex={1}
     >
-      <Text flexShrink={0} textAlign={"left"} color={"textMuted"}>
+      <Text
+        flexShrink={0}
+        variant={"small"}
+        textAlign={"left"}
+        color={"textMuted"}
+      >
         {label}
       </Text>
       <Text
         flex={1}
         textAlign={"right"}
         flexShrink={1}
+        variant={"small"}
         textBreakStrategy="balanced"
         fontFamily={"PrimaryBold"}
         {...rest}
@@ -61,10 +67,7 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
   _
 ) => {
   const [tx, setTx] = useState(txDetailRef.details); // set by preceeding screen
-  const { palette, styles, colors, borderRadii } = useStyles();
-  const viewShotRef = useRef(null);
-  const [sharingAsImage, setSharingAsImage] = useState(false);
-  const [sharingAsPdf, setSharingAsPdf] = useState(false);
+  const { palette, styles, colors } = useStyles();
 
   // Ensure data is available
   if (!tx?.response) {
@@ -74,7 +77,7 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
 
   const handleCopyToken = async () => {
     try {
-      await Clipboard.setStringAsync(token, {
+      await Clipboard.setStringAsync(rawToken, {
         inputFormat: Clipboard.StringFormat.PLAIN_TEXT,
       });
       Toast.success("Token copied");
@@ -86,30 +89,67 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
     Toast.success("Token copied");
   };
 
-  const handleShareAsImage = async () => {
-    setSharingAsImage(true);
+  /**
+   * Handles transaction report by opening email to support@wattly.ng
+   * with prefilled transaction reference
+   */
+  const handleReportTransaction = async () => {
     try {
-      await shareReceiptAsImage(viewShotRef, txId);
-    } finally {
-      setSharingAsImage(false);
+      const subject = encodeURIComponent("Transaction Report");
+      const body = encodeURIComponent(
+        `Hello Wattly Support,\n\nI would like to report an issue with the following transaction:\n\nTransaction Reference: ${txId}\n\nThank you.`
+      );
+      const supportEmail = "support@wattly.ng";
+      const mailtoUrl = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+
+      await Linking.openURL(mailtoUrl);
+    } catch (error: any) {
+      Alert.alert("Error", "Unable to open email client. Please try again.");
     }
   };
-
-  const handleShareAsPdf = async () => {
-    setSharingAsPdf(true);
-    try {
-      await shareReceiptAsPdf(viewShotRef, txId);
-    } finally {
-      setSharingAsPdf(false);
-    }
+  const handleShareReceipt = () => {
+    router.navigate({
+      pathname: "/(protected)/electricity/tx_receipt/[tx_id]",
+      params: {
+        tx_id: txId,
+        txId: txId,
+        amount,
+        customerAddress,
+        customerName,
+        meterType: meterType as MeterType,
+        meterNumber: meterNo,
+        providerLogo,
+        providerName,
+        serviceId: tx.service_id,
+        token,
+        txDate,
+        phone: tx.phone,
+        service: "Electricity",
+        debtAmount,
+        tariff,
+        taxAmount,
+        debtAmountPaid,
+        debtRemaining,
+        txStatus: txPending
+          ? "pending"
+          : txSuccessful
+          ? "successful"
+          : txReversed
+          ? "reversed"
+          : "failed",
+        units,
+      } satisfies ElectricityReceiptPayload & { tx_id: string },
+    });
   };
 
   // START: =====>>>>>>>> NORMALIZE TX FIELDS
-  const providerLogo = getElectricityProviderLogoFromText(
-    tx?.response?.content?.transactions?.product_name
+  const providerLogo = getElectricityProviderLogoFromServiceId(tx.service_id);
+
+  const providerName = normalizeProvidername(
+    tx?.response?.content?.transactions?.product_name,
+    tx?.service_id
   );
-  const providerName =
-    tx?.response?.content?.transactions?.product_name || "Electricity Provider";
+
   const amount = formatCurrency(
     parseFloat(
       getFirstValidValue(
@@ -120,10 +160,9 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
     ) || 0
   );
 
-  const token =
+  const rawToken =
     (tx.token || tx.response.token || tx.response.purchased_code) ?? "";
-  if (!token)
-    logger.error("ElectricityTxDetailsScreen:: No token found", { tx });
+  const token = rawToken.match(/.{1,4}/g)?.join("-") ?? rawToken;
 
   const meterNo =
     getFirstValidValue(tx.billers_code, tx.response.meterNumber) || "";
@@ -132,148 +171,140 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
 
   // these values are pre-populated by preceeding parent
   const customerName = tx.response.customerName;
-  const customerAddress = tx.response.customerAddress;
-
+  const customerAddress = tx.response.customerAddress || "N/A";
   //TODO: which tx id should show
   const txId = getFirstValidValue(
     tx.request_id,
     tx.response.content?.transactions?.transactionId,
     tx.response.requestId
   );
+  const tariff = tx.response.tariff;
+  const taxAmount = tx.response.taxAmount;
+  const debtAmount = tx.response.debtAmount;
+  const debtAmountPaid = tx.response.energyPaymentBreakdown?.debtAmountPaid;
+  const debtRemaining = tx.response.energyPaymentBreakdown?.debtRemaining;
+
   const txDate =
     dayjs(
       getFirstValidValue(tx.response.transaction_date, tx.updated_at)
-    ).format("Do MMMM YYYY h:mm A") || "N/A";
+    ).format("Do MMMM YYYY, h:mm A") || "N/A";
 
   const txPending = isTxPending(tx);
   const txSuccessful = isTxSuccessful(tx);
-  const txReversed = tx.response.code === "040";
+  const txReversed = tx.response?.code === "040";
 
   // polls status of pending tx
   useTxStatusPolling(tx, setTx);
 
   return (
     <ScreenBox inSafeArea={{ top: false }}>
-      <ViewShot
-        ref={viewShotRef}
-        style={{
-          backgroundColor: colors.surface,
-          borderRadius: borderRadii.m,
-        }}
-        options={{ format: "png", quality: 1 }}
-      >
-        <Box rg={"l"} borderRadius={"m"}>
-          <Box variant={"surface"} alignItems={"center"} rg={"s"} pt={"xl"}>
-            <Box
-              p="xxs"
-              borderWidth={1}
-              borderRadius="round"
-              alignItems="center"
-              justifyContent="center"
-              style={{
-                borderColor: palette.gray300,
-              }}
-            >
-              <Image source={providerLogo} style={styles.logo} />
-            </Box>
-            <Text variant={"body"} fontFamily={"PrimaryBold"}>
-              {providerName}
-            </Text>
-            <Text variant={"heading2"} fontFamily={"PrimaryBlack"}>
-              {amount}
-            </Text>
-            <Box
-              borderRadius={"round"}
-              alignItems={"center"}
-              justifyContent={"center"}
-              p={"xxs"}
-              px={"xl"}
-              style={{
-                backgroundColor: txSuccessful
-                  ? palette.green200
-                  : txPending
-                  ? palette.orange
-                  : txReversed
-                  ? palette.gray05
-                  : palette.red100,
-              }}
-            >
-              <Text
-                variant={"small"}
-                textAlign={"center"}
-                fontFamily={"PrimaryBold"}
-              >
-                {txSuccessful
-                  ? "Successful"
-                  : txPending
-                  ? "Processing"
-                  : txReversed
-                  ? "Reversed"
-                  : "Failed"}
-              </Text>
-            </Box>
+      <Box rg={"l"} borderRadius={"m"}>
+        {/* Header */}
+        <Box variant={"surface"} alignItems={"center"} rg={"s"} pt={"xl"}>
+          <Box
+            p="xxs"
+            borderWidth={1}
+            borderRadius="round"
+            alignItems="center"
+            justifyContent="center"
+            style={{
+              borderColor: palette.gray300,
+            }}
+          >
+            <Image source={providerLogo} style={styles.logo} />
           </Box>
-          {txSuccessful && token ? (
+          <Text variant={"body"} fontFamily={"PrimaryBold"}>
+            {providerName}
+          </Text>
+          <Text variant={"heading2"} fontFamily={"PrimaryBlack"}>
+            {amount}
+          </Text>
+          <ElectricityTopupStatusChip tx={tx} />
+        </Box>
+
+        {txSuccessful && token ? (
+          <Box
+            variant={"surface"}
+            borderRightWidth={0}
+            borderLeftWidth={0}
+            borderColor={"textMuted"}
+          >
             <Box
-              variant={"surface"}
-              style={{ borderRadius: 0 }}
-              borderWidth={1}
-              borderRightWidth={0}
-              borderLeftWidth={0}
-              borderColor={"textMuted"}
+              flexDirection={"row"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
             >
-              <Box flexDirection={"row"} cg={"xs"}>
-                <Text>Token:</Text>
+              <Box>
+                <Text variant={"small"} color={"textMuted"}>
+                  Token
+                </Text>
                 <Text fontFamily={"SpaceMono"} letterSpacing={1}>
                   {token}
                 </Text>
-                {!sharingAsImage ? (
-                  <Pressable
-                    style={styles.copyBtn}
-                    hitSlop={{ left: 30, right: 20, top: 10, bottom: 10 }}
-                    onPress={handleCopyToken}
-                  >
-                    <Ionicons
-                      name="copy-outline"
-                      size={s(18)}
-                      color={colors.primary}
-                    />
-                  </Pressable>
-                ) : null}
               </Box>
+
+              <Pressable
+                hitSlop={{ left: 30, right: 20, top: 10, bottom: 10 }}
+                onPress={handleCopyToken}
+              >
+                <Ionicons
+                  name="copy-outline"
+                  size={s(18)}
+                  color={colors.primary}
+                />
+              </Pressable>
             </Box>
-          ) : null}
-
-          <Box variant={"surface"} rg={"s"} pb={"xl"}>
-            <Text fontFamily={"PrimaryBold"}>Transaction Details</Text>
-            <DetailText label={"Meter Number"} value={meterNo} />
-            <DetailText label={"Customer Name"} value={customerName} />
-            <DetailText
-              label={"Meter Type"}
-              value={meterType}
-              textTransform={"uppercase"}
-            />
-            <DetailText label={"Customer Address"} value={customerAddress} />
-            <DetailText label={"Amount Paid"} value={amount} />
-            {units ? (
-              <DetailText label={"Units Purchased"} value={units} />
-            ) : null}
-            <DetailText label={"Transaction No."} value={txId} />
-            <DetailText label={"Transaction Date"} value={txDate} />
           </Box>
-        </Box>
-      </ViewShot>
+        ) : null}
 
-      <Box flexDirection={"row"} alignSelf={"center"} mt={"l"} cg={"l"}>
+        <Box variant={"surface"} rg={"s"} pb={"xl"}>
+          <Text fontFamily={"PrimaryBold"} variant={"small"}>
+            Transaction Details
+          </Text>
+          <DetailText label={"Meter Number"} value={meterNo} />
+          <DetailText label={"Customer Name"} value={customerName} />
+          <DetailText label={"Customer Address"} value={customerAddress} />
+          <DetailText label={"Phone"} value={tx.phone || "--"} />
+          <DetailText label={"Service"} value={"Electricity"} />
+          <DetailText
+            label={"Meter Type"}
+            value={meterType}
+            textTransform={"uppercase"}
+          />
+          <DetailText label={"Amount Paid"} value={amount} />
+          {units ? (
+            <DetailText label={"Units Purchased"} value={units} />
+          ) : null}
+          <DetailText label={"Tariff"} value={tariff || "N/A"} />
+          <DetailText label={"Tax"} value={formatCurrency(taxAmount || 0)} />
+          <DetailText
+            label={"Debt"}
+            value={formatCurrency(tx.response?.debtAmount || 0)}
+          />
+          <DetailText
+            label={"Debt Paid"}
+            value={formatCurrency(debtAmountPaid || 0)}
+          />
+          <DetailText
+            label={"Debt Remaining"}
+            value={formatCurrency(debtRemaining || 0)}
+          />
+
+          <DetailText label={"Transaction ID"} value={txId} />
+          <DetailText label={"Transaction Date"} value={txDate} />
+        </Box>
+      </Box>
+
+      <Box flexDirection={"row"} alignSelf={"center"} mt={"l"} cg={"s"}>
         <Button
-          label="Share as PDF"
-          onPress={handleShareAsPdf}
-          loading={sharingAsPdf}
+          label="Report"
+          onPress={handleReportTransaction}
+          style={{ flex: 1 }}
         />
         <Button
-          label="Share as Image"
-          onPress={handleShareAsImage}
-          loading={sharingAsImage}
+          label="Share Receipt"
+          style={{ flex: 1 }}
+          onPress={handleShareReceipt}
         />
       </Box>
     </ScreenBox>
@@ -283,11 +314,6 @@ export const ElectricityTxDetailsScreen: FC<ElectricityTxDetailsScreenProps> = (
 ElectricityTxDetailsScreen.displayName = "ElectricityTxDetailsScreen";
 
 const useStyles = createStyleHook(({ zIndices }) => ({
-  copyBtn: {
-    position: "absolute",
-    right: 0,
-    zIndex: zIndices.tooltip,
-  },
   logo: {
     width: "40@s",
     height: "40@s",

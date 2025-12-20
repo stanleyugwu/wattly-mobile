@@ -45,6 +45,14 @@ export interface IElectricityTx {
         };
       };
     };
+    energyPaymentBreakdown: {
+      amountPaid: string;
+      vat: number;
+      tokenValue?: number;
+      debtAmountPaid?: number;
+      debtRemaining?: number;
+      refundAmount?: number;
+    };
     response_description: string;
     requestId: string;
     amount: number;
@@ -167,4 +175,27 @@ export type TxDetailRef = {
 
 export type ServiceChargeResPayload = {
   charge: `${number}`;
+};
+
+export type ElectricityReceiptPayload = {
+  txId: string;
+  meterNumber: string;
+  customerName: string;
+  customerAddress: string;
+  serviceId: string;
+  service: string;
+  providerName: string;
+  providerLogo: string;
+  units: string;
+  meterType: MeterType;
+  amount: string;
+  txDate: string;
+  tariff: string;
+  taxAmount: number;
+  debtAmount: number;
+  debtAmountPaid?: number;
+  debtRemaining?: number;
+  phone: string;
+  token: string;
+  txStatus: "successful" | "pending" | "reversed" | "failed";
 };
