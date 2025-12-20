@@ -3,6 +3,7 @@ import { electricityTopupSchema } from "./schema";
 
 export type ElectricityTxStatus = "pending" | "initiated" | "delivered";
 export interface IElectricityTx {
+  token: string; // formatted token string
   id: number;
   user_id: string;
   request_id: string;
@@ -43,6 +44,14 @@ export interface IElectricityTx {
           computation_type: string;
         };
       };
+    };
+    energyPaymentBreakdown: {
+      amountPaid: string;
+      vat: number;
+      tokenValue?: number;
+      debtAmountPaid?: number;
+      debtRemaining?: number;
+      refundAmount?: number;
     };
     response_description: string;
     requestId: string;
@@ -162,4 +171,31 @@ export type ElectricityTopupReqPayload = {
  */
 export type TxDetailRef = {
   details: IElectricityTx | null;
+};
+
+export type ServiceChargeResPayload = {
+  charge: `${number}`;
+};
+
+export type ElectricityReceiptPayload = {
+  txId: string;
+  meterNumber: string;
+  customerName: string;
+  customerAddress: string;
+  serviceId: string;
+  service: string;
+  providerName: string;
+  providerLogo: string;
+  units: string;
+  meterType: MeterType;
+  amount: string;
+  txDate: string;
+  tariff: string;
+  taxAmount: number;
+  debtAmount: number;
+  debtAmountPaid?: number;
+  debtRemaining?: number;
+  phone: string;
+  token: string;
+  txStatus: "successful" | "pending" | "reversed" | "failed";
 };

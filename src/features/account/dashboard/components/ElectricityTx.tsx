@@ -5,8 +5,9 @@ import { txDetailRef } from "@/features/electricity/tx_detail_ref";
 import { IElectricityTx } from "@/features/electricity/types";
 import {
   createStyleHook,
-  getElectricityProviderLogoFromText,
+  getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
+  normalizeProvidername,
 } from "@/lib/utils";
 import { router } from "expo-router";
 import { Pressable } from "react-native";
@@ -22,7 +23,10 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
   const { styles } = useTheme();
 
   // E.g product name: "Ikeja Electric Payment - IKEDC"
-  const providerName = tx?.response?.content?.transactions?.product_name || "";
+  const providerName = normalizeProvidername(
+    tx?.response?.content?.transactions?.product_name,
+    tx?.service_id
+  );
 
   const meterNo = getFirstValidValue(
     tx?.response?.meterNumber,
@@ -30,9 +34,7 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
     tx?.response?.token
   );
 
-  const providerLogo = getElectricityProviderLogoFromText(
-    tx?.response?.content?.transactions?.product_name
-  );
+  const providerLogo = getElectricityProviderLogoFromServiceId(tx?.service_id);
 
   const viewTx = () => {
     txDetailRef.details = tx;
@@ -50,7 +52,7 @@ export const ElectricityTx: FC<ElectricityTxProps> = ({ tx }) => {
             <Text fontFamily={"PrimaryBold"} variant={"small"}>
               {providerName}
             </Text>
-            <Text variant={"small"}>({meterNo || "N/A"})</Text>
+            <Text variant={"small"}>{meterNo ? `(${meterNo})` : "--"}</Text>
           </Box>
         </Box>
       </Box>

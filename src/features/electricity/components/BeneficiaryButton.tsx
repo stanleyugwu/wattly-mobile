@@ -6,6 +6,7 @@ import {
   createStyleHook,
   getElectricityProviderLogoFromText,
 } from "@/lib/utils";
+import { Images } from "@assets/index";
 import { EvilIcons } from "@expo/vector-icons";
 import { s } from "react-native-size-matters";
 import { SavedBeneficiary } from "../types";
@@ -24,21 +25,22 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
   onSelect,
   beneficiary,
 }) => {
-  const { palette, styles } = useStyles();
+  const { palette, styles, colors } = useStyles();
   return (
     <Pressable onPress={onSelect}>
       <Box
-        variant={"elevated"}
+        variant={"surface"}
+        borderWidth={1}
+        borderColor={"border"}
         flexDirection={"row"}
         alignItems={"center"}
-        mx={"s"}
         bg={"background"}
-        style={{ shadowColor: palette.blue300 }}
         cg={"xs"}
       >
         <Box
           p={"xxs"}
           borderWidth={1}
+          flexShrink={0}
           borderRadius={"round"}
           style={{ borderColor: palette.gray300 }}
         >
@@ -46,36 +48,36 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
             source={getElectricityProviderLogoFromText(
               beneficiary.provider.name
             )}
+            placeholder={Images.icon}
             style={styles.providerLogo}
           />
         </Box>
-        <Box flex={0.8} flexDirection={"column"}>
-          <Text
-            fontFamily={"PrimaryBold"}
-            variant={"small"}
-            flexShrink={1}
-            numberOfLines={2}
-            ellipsizeMode="tail"
+        <Box flexDirection={"column"} flexShrink={1}>
+          <Box flexDirection={"row"} alignItems={"center"} cg={"s"}>
+            <Text
+              fontFamily={"PrimaryBold"}
+              variant={"caption"}
+              flexShrink={1}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {beneficiary.provider.name}
+            </Text>
+            <Pressable style={styles.deleteBtn} onPress={onDelete}>
+              <EvilIcons name="trash" color={colors.error} size={s(16)} />
+            </Pressable>
+          </Box>
+          <Box
+            flexDirection={"row"}
+            flexWrap={"wrap"}
+            alignItems={"center"}
+            cg={"xs"}
           >
-            {beneficiary.provider.name}
-          </Text>
-          <Box flexDirection={"row"} alignItems={"center"} cg={"xs"}>
-            <Text variant={"caption"} textTransform={"uppercase"}>
-              {beneficiary.meterName}
-            </Text>
-
-            <Text variant={"caption"} textTransform={"uppercase"}>
-              {beneficiary.meterNo}
-            </Text>
-            <Text variant={"caption"} textTransform={"uppercase"}>
-              {beneficiary.meterType}
-            </Text>
+            <Text variant={"caption"}>{beneficiary.meterName}</Text>
+            <Text variant={"caption"}>{beneficiary.meterNo}</Text>
+            <Text variant={"caption"}>{beneficiary.meterType}</Text>
           </Box>
         </Box>
-
-        <Pressable style={styles.deleteBtn} onPress={onDelete}>
-          <EvilIcons name="trash" color={palette.white} size={s(19)} />
-        </Pressable>
       </Box>
     </Pressable>
   );
@@ -83,17 +85,16 @@ export const BeneficiaryButton: FC<BeneficiaryButtonProps> = ({
 
 const useStyles = createStyleHook(({ colors, spacing, borderRadii }) => ({
   deleteBtn: {
-    position: "absolute",
-    right: 0,
-    backgroundColor: colors.error,
+    flexShrink: 0,
+    borderWidth: 1,
+    borderColor: colors.error,
     padding: spacing.xs,
-    borderTopLeftRadius: borderRadii.s,
-    borderBottomLeftRadius: borderRadii.s,
+    borderRadius: borderRadii.xs,
   },
   providerLogo: {
-    width: "35@s",
-    height: "35@s",
-    borderRadius: "25@s",
+    width: "30@s",
+    height: "30@s",
+    borderRadius: "15@s",
     aspectRatio: 1 / 1,
   },
 }));

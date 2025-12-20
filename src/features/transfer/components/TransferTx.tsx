@@ -24,7 +24,8 @@ export const TransferTx: FC<TransferTxProps> = ({ tx }) => {
   const { palette } = useTheme();
 
   const txDate = dayjs(tx.updated_at).format("Do MMMM h:mm A") || "N/A";
-  const isSender = tx.sender_id === user?.profile.id;
+  const isSender = tx?.sender_id === user?.profile.id;
+  const isTopup = isSender && !tx.recipient_account_number;
 
   return (
     <Pressable
@@ -55,14 +56,15 @@ export const TransferTx: FC<TransferTxProps> = ({ tx }) => {
             p={"s"}
           >
             <AntDesign
-              name={isSender ? "logout" : "login"}
-              color={isSender ? palette.red : palette.green}
+              name={isSender && !isTopup ? "logout" : "login"}
+              color={isSender && !isTopup ? palette.red : palette.green}
               size={s(20)}
             />
           </Box>
           <Box>
             <Text>
-              {(isSender ? tx.recipient_name : tx.sender_name) || "Sent"}
+              {(isSender && !isTopup ? tx.recipient_name : tx.sender_name) ||
+                "Sent"}
             </Text>
             <Text variant={"caption"}>{txDate}</Text>
           </Box>
@@ -70,11 +72,13 @@ export const TransferTx: FC<TransferTxProps> = ({ tx }) => {
 
         <Box>
           <Text
-            style={{ color: isSender ? palette.red : palette.green }}
+            style={{
+              color: isSender && !isTopup ? palette.red : palette.green,
+            }}
             variant={"small"}
             fontFamily={"PrimaryBold"}
           >
-            {isSender ? "-" : "+"}
+            {isSender && !isTopup ? "-" : "+"}
             {formatCurrency(+tx.amount || 0)}
           </Text>
         </Box>

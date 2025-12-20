@@ -1,5 +1,4 @@
-import React, { type FC } from "react";
-import { vs } from "react-native-size-matters";
+import React, { useEffect, type FC } from "react";
 
 import {
   Box,
@@ -11,13 +10,22 @@ import {
 } from "@/components";
 import { BulbIcon, PlusIcon, TransferIcon } from "@/components/icons";
 import { useAuth } from "@/contexts/auth";
+import { GET_PAYMENT_METADATA_QUERY_KEY } from "@/features/wallet/hooks";
+import { queryClient } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { createStyleHook } from "@/lib/utils";
+import { getProfile } from "@/services/api";
 import { Images } from "@assets/index";
 import { router } from "expo-router";
-import { Platform, Pressable, ScrollView } from "react-native";
-import { ElectricityTxSkeleton, useGetElectricityTxs } from "../../electricity";
+import { Pressable, RefreshControl, ScrollView } from "react-native";
+import {
+  ElectricityApis,
+  ElectricityTxSkeleton,
+  GET_SERVICE_CHARGE_KEY,
+  useGetElectricityTxs,
+} from "../../electricity";
 import { useGetTransferHistory } from "../../transfer";
-import { WalletTxSkeleton } from "../../wallet";
+import { WalletApis, WalletTxSkeleton } from "../../wallet";
 import { CurvyIconButton, ElectricityTx, Wallet, WalletTx } from "./components";
 
 interface DashboardScreenProps {}
@@ -27,16 +35,55 @@ interface DashboardScreenProps {}
  */
 export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
   const { user } = useAuth();
-  const { palette, styles } = useStyles();
+  const { palette, styles, spacing } = useStyles();
 
   const electrictyTxs = useGetElectricityTxs();
   const walletTxs = useGetTransferHistory();
+  const { syncProfile } = useAuth();
 
   const electricityData = electrictyTxs.data?.slice(0, 2) || [];
   const walletData = walletTxs.data?.slice(0, 5) || [];
 
+  const handleRefresh = async () => {
+    electrictyTxs.refetch();
+    walletTxs.refetch();
+    getProfile()
+      .then((res) => {
+        syncProfile(res);
+      })
+      .catch((err) => {
+        logger.warn("Failed to fetch profile", { error: err.message });
+      });
+  };
+
+  //  prefetch payment options and service charge requests for speed
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: GET_PAYMENT_METADATA_QUERY_KEY,
+      queryFn: WalletApis.getPaymentMetadata,
+      isDataEqual(oldData, newData) {
+        return JSON.stringify(oldData) === JSON.stringify(newData);
+      },
+    });
+    queryClient.prefetchQuery({
+      queryKey: GET_SERVICE_CHARGE_KEY,
+      queryFn: ElectricityApis.getServiceCharge,
+    });
+  }, []);
+
   return (
-    <ScreenBox rowGap={"xxl"}>
+    <ScreenBox
+      rowGap={"xl"}
+      scrollViewProps={{
+        refreshControl: (
+          <RefreshControl
+            onRefresh={handleRefresh}
+            refreshing={electrictyTxs.isRefetching || walletTxs.isRefetching}
+            title="Refreshing"
+          />
+        ),
+      }}
+    >
       <Box
         flexDirection={"row"}
         alignItems={"center"}
@@ -63,56 +110,68 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
       </Box>
 
       <Wallet />
-      <Box justifyContent={"center"} alignItems={"center"}>
-        <Box
-          width={"100%"}
-          height={vs(30)}
-          borderRadius={"round"}
-          style={{ backgroundColor: palette.blue100 }}
+
+      <ScrollView
+        horizontal
+        style={styles.btnScrollView}
+        contentContainerStyle={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          columnGap: spacing.xs,
+        }}
+        showsHorizontalScrollIndicator={false}
+      >
+        <CurvyIconButton
+          label="Add Money"
+          Icon={<PlusIcon />}
+          onPress={() => router.navigate("/(protected)/wallet/add_money")}
         />
-        <ScrollView
-          style={styles.btnScrollView}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          <Box flexDirection={"row"} justifyContent={"space-between"}>
-            <CurvyIconButton
-              label="Add Money"
-              Icon={<PlusIcon />}
-              onPress={() => router.navigate("/(protected)/wallet/add_money")}
-            />
-            <CurvyIconButton
-              onPress={() => router.navigate("/(protected)/electricity")}
-              label="Electricity"
-              Icon={<BulbIcon />}
-            />
-            <CurvyIconButton
-              label="Transfer"
-              Icon={<TransferIcon />}
-              onPress={() => router.navigate("/(protected)/transfer")}
-            />
-          </Box>
-        </ScrollView>
-      </Box>
+        <CurvyIconButton
+          onPress={() => router.navigate("/(protected)/electricity")}
+          label="Electricity"
+          Icon={<BulbIcon />}
+        />
+        <CurvyIconButton
+          label="Transfer"
+          Icon={<TransferIcon />}
+          onPress={() => router.navigate("/(protected)/transfer")}
+        />
+      </ScrollView>
 
       <Box variant={"surface"} rg={"s"}>
         {electricityData.length ? (
-          <Pressable
-            style={{ alignItems: "center" }}
-            onPress={() => router.navigate("/(protected)/electricity")}
+          <Box
+            flexDirection={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
           >
-            <Box
-              bg={"primary"}
-              p={"xxs"}
-              alignSelf={"flex-start"}
-              px={"s"}
-              borderRadius={"xs"}
+            <Pressable
+              style={{ alignItems: "center" }}
+              onPress={() => router.navigate("/(protected)/electricity")}
             >
-              <Text variant={"small"} color={"primaryText"}>
-                Buy Again
-              </Text>
-            </Box>
-          </Pressable>
+              <Box
+                bg={"primary"}
+                p={"xxs"}
+                alignSelf={"flex-start"}
+                px={"s"}
+                borderRadius={"xs"}
+              >
+                <Text variant={"small"} color={"primaryText"}>
+                  Buy Again
+                </Text>
+              </Box>
+            </Pressable>
+            <Text
+              variant={"small"}
+              color={"primary"}
+              fontFamily={"PrimaryBold"}
+              onPress={() =>
+                router.navigate("/(protected)/electricity/tx_history")
+              }
+            >
+              See more
+            </Text>
+          </Box>
         ) : null}
 
         {/* Loader */}
@@ -138,11 +197,12 @@ export const DashboardScreen: FC<DashboardScreenProps> = (props) => {
           flexDirection={"row"}
         >
           <Text variant={"body"} fontFamily={"PrimaryBold"}>
-            Recent Transfers
+            Recent Transactions
           </Text>
           <Text
             variant={"small"}
             color={"primary"}
+            fontFamily={"PrimaryBold"}
             onPress={() =>
               router.navigate("/(protected)/transfer/transfer_history")
             }
@@ -177,11 +237,7 @@ DashboardScreen.displayName = "DashboardScreen";
 const useStyles = createStyleHook(({ borderRadii, colors }) => ({
   btnScrollView: {
     flex: 1,
-    position: "absolute",
-    top: Platform.select({
-      android: -13,
-      ios: -10,
-    }),
+    alignSelf: "center",
   },
   profilePic: {
     width: "45@s",

@@ -26,13 +26,9 @@ export const ProviderSelectButton: FC<ProviderSelectButtonProps> = ({
       <Box flexDirection="row" alignItems="center" flex={1} cg={"xs"}>
         <Box
           p="xxs"
-          borderWidth={1}
           borderRadius="round"
           alignItems="center"
           justifyContent="center"
-          style={{
-            borderColor: palette.gray300,
-          }}
         >
           <Image
             source={logo?.trim() ? logo : Images.iconSmall}
@@ -46,6 +42,7 @@ export const ProviderSelectButton: FC<ProviderSelectButtonProps> = ({
           fontFamily={"PrimaryBold"}
           ellipsizeMode="tail"
           flexShrink={1}
+          mr={"s"}
         >
           {provider}
         </Text>
@@ -61,12 +58,16 @@ export const ProviderSelectButton: FC<ProviderSelectButtonProps> = ({
   );
 };
 
-const useStyles = createStyleHook(({ spacing, isDarkMode, palette }) => ({
+const useStyles = createStyleHook(({ spacing, colors, borderRadii }) => ({
   container: {
     justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "row",
     paddingVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadii.m,
+    paddingHorizontal: spacing.xs,
   },
   logo: {
     width: "30@s",

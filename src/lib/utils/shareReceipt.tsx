@@ -1,13 +1,13 @@
 import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { captureRef } from "react-native-view-shot";
+import ViewShot, { captureRef } from "react-native-view-shot";
 
 import { logger } from "../logger";
 import { Toast } from "../toast";
 
 export const shareReceiptAsImage = async (
-  viewShotRef: React.RefObject<null>,
+  viewShotRef: React.RefObject<ViewShot | null>,
   txId: string = "",
   namePrefix?: string
 ) => {
@@ -36,7 +36,7 @@ export const shareReceiptAsImage = async (
 };
 
 export const shareReceiptAsPdf = async (
-  viewShotRef: React.RefObject<null>,
+  viewShotRef: React.RefObject<ViewShot | null>,
   txId: string = ""
 ) => {
   try {

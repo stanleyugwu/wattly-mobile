@@ -26,7 +26,7 @@ export const CurvyIconButton: FC<CurvyIconButtonProps> = ({
         flexDirection={"row"}
         alignItems={"center"}
         padding={"s"}
-        borderRadius={"round"}
+        borderRadius={"m"}
         cg={"xxs"}
         style={{ backgroundColor: palette.blue100 }}
       >

@@ -50,10 +50,16 @@ export const QrCodeScanScreen: FC<QrCodeScanScreenProps> = (_) => {
 
   if (!permission.granted) {
     return (
-      <Box style={styles.container}>
-        <Text textAlign={"center"}>
-          We need your permission to show the camera
-        </Text>
+      <Box flex={1} justifyContent={"center"} mx="l" rg={"m"}>
+        <Box>
+          <Text variant={"heading3"} textAlign={"center"}>
+            Camera Permission Required
+          </Text>
+          <Text textAlign={"center"}>
+            We need your permission to access the camera to enable instant
+            transfers
+          </Text>
+        </Box>
         <Button onPress={requestPermission} title="Grant permission" />
       </Box>
     );

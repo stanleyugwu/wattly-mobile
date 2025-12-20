@@ -36,6 +36,13 @@ export default function ProtectedLayout() {
         }}
       />
       <Stack.Screen
+        name="electricity/tx_receipt/[tx_id]"
+        options={{
+          title: "Electricity Topup Receipt",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
         name="electricity/tx_history"
         options={{
           headerTitle: "Electricity Transactions",
@@ -63,8 +70,9 @@ export default function ProtectedLayout() {
       <Stack.Screen
         name="transfer/transfer_details/[reference]"
         options={{
-          headerTitle: "Transfer Receipt",
-          title: "Transfer Receipt",
+          headerTitle: "Transaction Receipt",
+          title: "Transaction Receipt",
+          headerBackTitle: "Back",
           headerTitleAlign: "center",
           headerShadowVisible: false,
         }}
@@ -72,8 +80,8 @@ export default function ProtectedLayout() {
       <Stack.Screen
         name="transfer/transfer_history"
         options={{
-          headerTitle: "Transfer History",
-          title: "Transfer History",
+          headerTitle: "Transaction History",
+          title: "Transaction History",
           headerBackTitle: "Transfer",
         }}
       />

@@ -3,8 +3,9 @@ import { logger } from "@/lib/logger";
 import {
   createStyleHook,
   formatCurrency,
-  getElectricityProviderLogoFromText,
+  getElectricityProviderLogoFromServiceId,
   getFirstValidValue,
+  normalizeProvidername,
 } from "@/lib/utils";
 import dayjs from "dayjs";
 import { router } from "expo-router";
@@ -13,6 +14,7 @@ import { Pressable } from "react-native";
 import { txDetailRef } from "../tx_detail_ref";
 import { IElectricityTx } from "../types";
 import { isTxSuccessful } from "../utils";
+import { ElectricityTopupStatusChip } from "./ElectricityTopupStatusChip";
 
 interface ElectricityTxHistoryProps {
   tx: IElectricityTx;
@@ -31,8 +33,11 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
     return null;
   }
 
-  const providerName = tx.response.content?.transactions?.product_name || "";
-  const providerLogo = getElectricityProviderLogoFromText(providerName);
+  const providerName = normalizeProvidername(
+    tx.response.content?.transactions?.product_name,
+    tx.service_id
+  );
+  const providerLogo = getElectricityProviderLogoFromServiceId(tx.service_id);
   const amount = formatCurrency(
     parseFloat(
       getFirstValidValue(
@@ -95,23 +100,12 @@ export const ElectricityTxHistory: FC<ElectricityTxHistoryProps> = ({ tx }) => {
 
         <Box rg={"xxs"}>
           <Text fontFamily={"PrimaryBlack"}>-{amount}</Text>
-          <Box
+          <ElectricityTopupStatusChip
+            textProps={{ style: { fontSize: 10 } }}
             borderRadius={"xs"}
-            alignItems={"center"}
-            justifyContent={"center"}
-            style={{
-              backgroundColor: txSuccessful ? palette.green200 : palette.red100,
-            }}
-          >
-            <Text
-              variant={"small"}
-              textAlign={"center"}
-              fontFamily={"PrimaryBold"}
-              style={{ fontSize: 10 }}
-            >
-              {txSuccessful ? "Successful" : "Failed"}
-            </Text>
-          </Box>
+            px={"xxs"}
+            tx={tx}
+          />
         </Box>
       </Box>
     </Pressable>

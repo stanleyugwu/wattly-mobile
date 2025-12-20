@@ -36,10 +36,15 @@ export const ProviderSheet = forwardRef<BottomSheetRef, ProviderSheetProps>(
     );
 
     return (
-      <BottomSheet ref={ref} {...otherProps}>
-        <Text variant={"heading3"} my={"s"}>
-          Select Service Provider
-        </Text>
+      <BottomSheet ref={ref} enablePanDownToClose {...otherProps}>
+        <Box my={"s"}>
+          <Text variant={"heading3"} textAlign={"center"}>
+            Service Provider
+          </Text>
+          <Text variant={"small"} textAlign={"center"} color={"textMuted"}>
+            Select an electricity service provider for top-up
+          </Text>
+        </Box>
         {query.isLoading || query.isFetching ? (
           <Box mt={"xxl"}>
             <ElectricityTxSkeleton count={6} show />

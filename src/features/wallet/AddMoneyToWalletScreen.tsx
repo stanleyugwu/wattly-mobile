@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 import React, { useRef, useState, type FC } from "react";
-import { Keyboard, Pressable } from "react-native";
+import { ActivityIndicator, Keyboard, Linking, Pressable } from "react-native";
 import { s, ScaledSheet } from "react-native-size-matters";
 
 import {
@@ -8,6 +8,7 @@ import {
   BottomSheetRef,
   Box,
   Button,
+  NetworkError,
   ScreenBox,
   Text,
   TextInput,
@@ -18,6 +19,7 @@ import { useTheme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getPaymentRef } from "./api";
+import { useGetPaymentMetadata } from "./hooks";
 import { PaymentProvider } from "./types";
 
 interface DetailBoxProps {
@@ -61,9 +63,22 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
   const [amount, setAmount] = useState("");
   const selectedProvider = useRef<PaymentProvider>("paystack");
 
-  const BANK_NAME = "--";
-  const ACCOUNT_NUMBER = "--";
-  const ACCOUNT_NAME = "--";
+  const { colors } = useTheme();
+
+  const {
+    data: paymentMetadata,
+    isLoading: isLoadingPaymentMetadata,
+    refetch,
+    isError,
+  } = useGetPaymentMetadata();
+
+  const BANK_NAME = paymentMetadata?.bankdetail?.bankName || "--";
+  const ACCOUNT_NUMBER = paymentMetadata?.bankdetail?.accountNumber || "--";
+  const ACCOUNT_NAME = paymentMetadata?.bankdetail?.accountName || "--";
+
+  const isPaystackAvailable = paymentMetadata?.paystack;
+  const isFlutterwaveAvailable = paymentMetadata?.flutterwave;
+  const isManualPaymentAvailable = paymentMetadata?.manual;
 
   const amtInsufficient =
     !parseFloat(amount) || +amount < 100 || +amount > 1000000;
@@ -95,44 +110,95 @@ export const AddMoneyToWalletScreen: FC<AddMoneyToWalletScreenProps> = (_) => {
     }
   };
 
+  const contactAdmin = () => {
+    const message = "Hello, I just made a manual payment.";
+    // contact on whatsapp
+    const phoneNumber = paymentMetadata?.phone || "";
+    const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
+      message
+    )}`;
+    Linking.openURL(url).catch(() => {
+      Linking.openURL(
+        `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+      ).catch((error) => {
+        logger.error("AddMoneyToWalletScreen:: Failed to open whatsapp web", {
+          error,
+        });
+      });
+    });
+  };
+
   return (
     <>
       <ScreenBox inSafeArea={false} rg={"s"}>
         <Box variant={"surface"}>
-          <Text>
-            Use the details below to send money to your Wattlypay Account from
-            any bank's app or through internet banking
+          <Text variant={"small"} textAlign={"center"}>
+            Choose any of the options below to fund your Wattly Account: Use any
+            of the available instant payment methods or transfer via the bank
+            details provided.
           </Text>
         </Box>
-        <Box variant={"surface"} rg={"xs"}>
-          <Text mt={"s"}>Bank Name</Text>
-          <DetailBox detail={BANK_NAME} />
 
-          <Text mt={"s"}>Account Number</Text>
-          <DetailBox detail={ACCOUNT_NUMBER} />
+        {isLoadingPaymentMetadata ? (
+          <Box rg={"s"} alignItems={"center"} mt={"l"}>
+            <ActivityIndicator size={18} color={colors.primary} />
+            <Text variant={"small"}>Loading payment options</Text>
+          </Box>
+        ) : isError ? (
+          <Box variant={"surface"} my={"l"}>
+            <NetworkError
+              onRetry={refetch}
+              body="Couldn't load available payment options, please retry"
+            />
+          </Box>
+        ) : null}
 
-          <Text mt={"s"}>Account Name</Text>
-          <DetailBox detail={ACCOUNT_NAME} />
-        </Box>
+        {isPaystackAvailable && (
+          <Button
+            label="Top up with Paystack"
+            onPress={() => {
+              selectedProvider.current = "paystack";
+              amountSheetRef.current?.expand();
+            }}
+          />
+        )}
 
-        <Text textAlign={"center"} my={"l"}>
-          Or
-        </Text>
+        {isFlutterwaveAvailable && (
+          <Button
+            label="Top up with Flutterwave"
+            onPress={() => {
+              selectedProvider.current = "flutterwave";
+              amountSheetRef.current?.expand();
+            }}
+          />
+        )}
 
-        <Button
-          label="Top up with Paystack"
-          onPress={() => {
-            selectedProvider.current = "paystack";
-            amountSheetRef.current?.expand();
-          }}
-        />
-        <Button
-          label="Top up with Flutterwave"
-          onPress={() => {
-            selectedProvider.current = "flutterwave";
-            amountSheetRef.current?.expand();
-          }}
-        />
+        {isManualPaymentAvailable && (
+          <>
+            <Text textAlign={"center"} my={"l"}>
+              Or
+            </Text>
+            <Box variant={"surface"} rg={"xs"}>
+              <Text variant={"small"} textAlign={"center"} mb={"m"}>
+                Make a manual transfer using the details below. After payment,
+                please contact the admin to verify your transaction.
+              </Text>
+
+              <Text mt={"s"}>Bank Name</Text>
+              <DetailBox detail={BANK_NAME} />
+
+              <Text mt={"s"}>Account Number</Text>
+              <DetailBox detail={ACCOUNT_NUMBER} />
+
+              <Text mt={"s"}>Account Name</Text>
+              <DetailBox detail={ACCOUNT_NAME} />
+
+              <Box alignItems={"center"} mt={"l"}>
+                <Button label="Contact Admin" onPress={contactAdmin} />
+              </Box>
+            </Box>
+          </>
+        )}
       </ScreenBox>
 
       <BottomSheet

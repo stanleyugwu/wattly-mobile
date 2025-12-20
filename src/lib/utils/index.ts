@@ -4,5 +4,6 @@ export * from "./getElectricityProviderLogoFromText";
 export * from "./getFirstValidValue";
 export * from "./globalErrorHandler";
 export * from "./groupAndSortRecords";
+export * from "./normalizeProviderName";
 export * from "./requestAppReview";
 export * from "./shareReceipt";

@@ -65,13 +65,14 @@ export const ForgotPasswordScreen = () => {
         help you get back to your account
       </Text>
 
-      <Box gap={"xxl"} pt={"xxl"} flex={1}>
+      <Box gap={"xxl"} pt={"xl"} flex={1} variant={"surface"} mt="l">
         <Box gap={"xs"}>
           <Text>Email Address</Text>
           <TextInput
             value={email}
             onFocus={() => setEmailError("")}
             placeholder="Email Address"
+            onSubmitEditing={handleSendPasswordResetOtp}
             onChangeText={(text) => setEmail(text)}
             error={emailError}
           />
@@ -79,7 +80,7 @@ export const ForgotPasswordScreen = () => {
         <Button
           label="Continue"
           loading={isLoading}
-          style={{ marginTop: 40 }}
+          style={{ marginTop: 10 }}
           onPress={handleSendPasswordResetOtp}
         />
       </Box>
